@@ -1,0 +1,22 @@
+{
+  "name": "mongolog",
+  "version": "0.0.1",
+  "description": "Helpers for parsing MongoDB logs",
+  "dependencies": {
+    "debug": "^0.7.4",
+    "regret": "^0.1.1"
+  },
+  "devDependencies": {
+    "mocha": "^1.17.1"
+  },
+  "keywords": [
+    "mongodb"
+  ],
+  "repository": {
+    "type" : "git",
+    "url" : "http://github.com/imlucas/node-mongolog.git"
+  },
+  "author": "Lucas Hrabovsky <hrabovsky.lucas@gmail.com> (http://imlucas.com)",
+  "license": "MIT",
+  "homepage": "http://github.com/imlucas/node-mongolog"
+}
