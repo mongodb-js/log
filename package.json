@@ -1,6 +1,6 @@
 {
   "name": "mongolog",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Helpers for parsing MongoDB logs",
   "dependencies": {
     "debug": "^0.7.4",
