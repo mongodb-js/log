@@ -6,7 +6,11 @@ regret.add('date.iso',
   /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+-[0-5]\d/,
   '2014-02-13T18:00:04.709-0500');
 
-regret.add('mongodb.log', /({{date.iso}}+) \[(\w+)\] (.*)/,
+regret.add('date',
+  /\w{3} \w{3} \d{1,2} \d{1,2}:\d{2}:\d{2}/,
+  'Wed Mar 12 14:42:31');
+
+regret.add('mongodb.log', /({{date.iso}}|{{date}}) \[(\w+)\] (.*)/,
   '2014-02-13T18:00:04.709-0500 [initandlisten] db version v2.5.6-pre-',
   ['date', 'name', 'message']);
 
@@ -32,9 +36,10 @@ function getEvent(msg){
 
 function Entry(data, opts){
   opts = opts || {};
+  data = data || {};
   opts.wrap = opts.wrap || 80;
   this.name = data.name;
-  this.message = data.message;
+  this.message = data.message || '';
   this.date = data.date || new Date();
   this.event = getEvent(this.message);
 }
@@ -47,6 +52,10 @@ module.exports.parse = function(lines, opts){
   return lines.filter(function(line){
     return line.length > 0;
   }).map(function(line){
-    return new Entry(regret(/^mongodb.log/, line, opts));
+    var match = regret(/^mongodb.log/, line, opts);
+    if(!match){
+      match = {message: line};
+    }
+    return new Entry(match);
   });
 };
