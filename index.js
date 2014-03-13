@@ -54,7 +54,7 @@ module.exports.parse = function(lines, opts){
     lines = [lines];
   }
   return lines.filter(function(line){
-    return line.length > 0;
+    return line && line.length > 0;
   }).map(function(line){
     var match = regret(/^mongodb.log/, line, opts);
     if(!match){

@@ -12,4 +12,7 @@ describe('parse', function(){
     var res = log.parse(line)[0];
     assert.equal(res.name, 'initandlisten');
   });
+  it('should not puke on nulls', function(){
+    log.parse(null);
+  });
 });
