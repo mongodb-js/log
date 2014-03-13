@@ -3,7 +3,7 @@ var regret = require('regret'),
   debug = require('debug')('mongolog');
 
 regret.add('date.iso',
-  /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+-[0-5]\d/,
+  /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{1,3}-\d{4}/,
   '2014-02-13T18:00:04.709-0500');
 
 regret.add('date',

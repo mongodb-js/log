@@ -2,6 +2,9 @@
   "name": "mongolog",
   "version": "0.0.3",
   "description": "Helpers for parsing MongoDB logs",
+  "scripts": {
+    "test": "mocha"
+  },
   "dependencies": {
     "debug": "^0.7.4",
     "regret": "^0.1.1"
