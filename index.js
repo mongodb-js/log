@@ -49,6 +49,10 @@ Entry.prototype.toString = function(){
 };
 
 module.exports.parse = function(lines, opts){
+  opts = opts || {};
+  if(!Array.isArray(lines)){
+    lines = [lines];
+  }
   return lines.filter(function(line){
     return line.length > 0;
   }).map(function(line){
