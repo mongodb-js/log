@@ -1,6 +1,6 @@
 {
   "name": "mongolog",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Helpers for parsing MongoDB logs",
   "scripts": {
     "test": "mocha"
