@@ -1,7 +1,7 @@
 {
-  "name": "mongolog",
-  "version": "0.0.5",
-  "description": "Helpers for parsing MongoDB logs",
+  "name": "mongodb-log",
+  "version": "0.1.0",
+  "description": "Turn flat mongodb log entires into nice structured objects.",
   "scripts": {
     "test": "mocha"
   },
@@ -13,13 +13,14 @@
     "mocha": "^1.17.1"
   },
   "keywords": [
-    "mongodb"
+    "mongodb",
+    "mongodb.js"
   ],
   "repository": {
     "type": "git",
-    "url": "http://github.com/imlucas/node-mongolog.git"
+    "url": "http://github.com/imlucas/mongodb-log.git"
   },
   "author": "Lucas Hrabovsky <hrabovsky.lucas@gmail.com> (http://imlucas.com)",
   "license": "MIT",
-  "homepage": "http://github.com/imlucas/node-mongolog"
+  "homepage": "http://github.com/imlucas/mongodb-log"
 }
