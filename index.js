@@ -1,6 +1,4 @@
-var regret = require('regret'),
-  util = require('util'),
-  debug = require('debug')('mongolog');
+var regret = require('regret');
 
 regret.add('date.iso',
   /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{1,3}-\d{4}/,
@@ -19,7 +17,7 @@ regret.add('mongodb.logshutdown', /(\w+)\: (.*)/,
 
 function errorMessage(msg){
   if(msg.indexOf('mongod instance already running?') > -1){
-  return new Error('already running');
+    return new Error('already running');
   }
   return new Error(msg);
 }
@@ -44,10 +42,6 @@ function Entry(data, opts){
   this.event = getEvent(this.message);
 }
 
-Entry.prototype.toString = function(){
-  return this.date.toString() + ' [' + this.name + '] ' + this.message;
-};
-
 module.exports.parse = function(lines, opts){
   opts = opts || {};
   if(!Array.isArray(lines)){
@@ -57,9 +51,7 @@ module.exports.parse = function(lines, opts){
     return line && line.length > 0;
   }).map(function(line){
     var match = regret(/^mongodb.log/, line, opts);
-    if(!match){
-      match = {message: line};
-    }
+    match = match || {message: line};
     return new Entry(match);
   });
 };

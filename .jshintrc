@@ -11,9 +11,10 @@
     "after",
     "afterEach"
   ],
+  "indent": "2",
   "unused": true,
   "trailing": true,
-  "boss": true,
   "loopfunc": true,
-  "undef": true
+  "undef": true,
+  "quotmark": "single"
 }

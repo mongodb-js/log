@@ -20,6 +20,14 @@ describe('parse', function(){
     assert.deepEqual(expected, res);
   });
 
+  it('should handle fatal errors', function(){
+    var line = 'Wed Mar 12 14:42:31 [initandlisten] exception in initAndListen:' +
+      ' 10309 Unable to create/open lock file: /data/mongod.lock errno:13' +
+      ' Permission denied Is a mongod instance already running?, terminating',
+      res = log.parse(line)[0];
+      assert.equal(res.event.name, 'error');
+  });
+
   it('should not puke on nulls', function(){
     log.parse(null);
   });
