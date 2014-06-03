@@ -16,5 +16,6 @@
   "trailing": true,
   "loopfunc": true,
   "undef": true,
-  "quotmark": "single"
+  "quotmark": "single",
+  "maxlen": 80
 }
