@@ -48,3 +48,17 @@ Violations of this scheme should be reported as bugs. Specifically, if a
 minor or patch version is released that breaks backward compatibility,
 that version should be immediately yanked and/or a new version should be
 immediately released that restores compatibility.
+
+## Pro
+
+If you've been doing JS for awhile, thanks for checking this out.  The quick
+version of the house rules are:
+
+- Indent 2 spaces
+- Single quotes > double quotes
+- Don't use ASI
+- Maximum line length is 80
+- Don't check in `dist` files
+- Avoid mutation
+- Write tests that make sense
+- Test must always be green
