@@ -17,5 +17,6 @@
   "loopfunc": true,
   "undef": true,
   "quotmark": "single",
-  "maxlen": 80
+  "maxlen": 80,
+  "multistr": true
 }
