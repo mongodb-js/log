@@ -1,4 +1,4 @@
-var regret = require('./regretSetup');
+var regret = require('./patterns');
 
 function errorMessage(msg){
   if(msg.indexOf('mongod instance already running?') > -1){
