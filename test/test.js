@@ -1,5 +1,5 @@
-var log = require('./'),
-  assert = require('assert');
+var assert = require('assert'),
+    log    = require('./..');
 
 describe('parse', function(){
   it('should match', function(){
