@@ -1,4 +1,4 @@
-var log = require('./'),
+var log = require('./..'),
   assert = require('assert');
 
 describe('parse', function(){
