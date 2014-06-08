@@ -51,11 +51,10 @@ Example:
 
 ```
 2014-05-31T14:21:14.734-0400 [initandlisten] connection accepted from
-127.0.0.1:51786 #14 (3 connections now open) 
-2014-05-31T14:21:14.734-0400 [conn14] command admin.$cmd command: isMaster { is
-master: 1 } keyUpdates:0 numYields:0  reslen:371 0ms 
-2014-05-31T14:21:14.735-0400 [conn14] end connection 127.0.0.1:51786 (2 
-connections now open)
+127.0.0.1:51786 #14 (3 connections now open) 2014-05-31T14:21:14.734-0400
+[conn14] command admin.$cmd command: isMaster { ismaster: 1 } keyUpdates:0
+numYields:0  reslen:371 0ms 2014-05-31T14:21:14.735-0400 [conn14] end
+connection 127.0.0.1:51786 (2 connections now open)
 ```
 
 | line # |    `thread`   | `conn` |
