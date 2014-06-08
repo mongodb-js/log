@@ -2,7 +2,7 @@ var regret = require('regret');
 
 regret.add(
   'ctimeCase1',
-  /\w{3} \w{3}  \d{1} \d{2}:\d{2}:\d{2}.\d{3}/,
+  /\w{3} \w{3}  \d \d{2}:\d{2}:\d{2}.\d{3}/,
   'Wed Mar  2 14:42:31.000'
 );
 
