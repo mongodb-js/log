@@ -21,7 +21,7 @@ function Entry(data, opts){
   opts = opts || {};
   data = data || {};
   opts.wrap = opts.wrap || 80;
-  this.name = data.name;
+  this.thread = data.thread;
   this.message = data.message || '';
   this.date = data.date || new Date();
   this.event = getEvent(this.message);
