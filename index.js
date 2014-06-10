@@ -46,7 +46,10 @@ module.exports.parse = function(lines, opts){
     return line && line.length > 0;
   }).map(function(line){
     var match = regret(/^mongodb.log/, line, opts);
-    match = match || { message: line };
+
+    if (match === null)
+      return { line: line };
+  
     return new Entry(match);
   });
 };
