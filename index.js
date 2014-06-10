@@ -22,11 +22,11 @@ function Entry(data, opts){
   
   opts.wrap = opts.wrap || 80;
 
-  res = regret('connectionAccepted', data.message);
+  var res = regret('connectionAccepted', data.message);
 
-  if (res != null)
-    this.conn = 'conn' + res['connNum'];
-  else if (data.name.substring(0, 4) == 'conn')
+  if (res !== null)
+    this.conn = 'conn' + res.connNum;
+  else if (data.name.substring(0, 4) === 'conn')
     this.conn = data.name;
 
   this.date = data.date || new Date();
