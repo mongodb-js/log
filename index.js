@@ -25,6 +25,7 @@ function Entry(data, opts){
   this.message = data.message || '';
   this.date = data.date || new Date();
   this.event = getEvent(this.message);
+  this.line = data.line;
 }
 
 module.exports.parse = function(lines, opts){
@@ -36,7 +37,7 @@ module.exports.parse = function(lines, opts){
     return line && line.length > 0;
   }).map(function(line){
     var match = regret(/^mongodb.log/, line, opts);
-    match = match || {message: line};
+    match = match || { message: line };
     return new Entry(match);
   });
 };
