@@ -2,7 +2,7 @@ var assert = require('assert'),
     log    = require('./..');
 
 describe('parse', function() {
-  it('should match timestamps', function() {
+  it('should match the timestamp from each log line', function() {
     var data = {
       'ctime': [
         'Wed Mar  2 14:42:31.000',
