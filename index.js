@@ -19,15 +19,17 @@ function getEvent(msg){
 function Entry(data, opts){
   opts = opts || {};
   data = data || {};
-  
+
   opts.wrap = opts.wrap || 80;
 
-  var res = regret('connectionAccepted', data.message);
+  var match = regret('connectionAccepted', data.message);
 
-  if (res !== null)
-    this.conn = 'conn' + res.connNum;
-  else if (data.name.substring(0, 4) === 'conn')
+  if (match !== null){
+    this.conn = 'conn' + match.connNum;
+  }
+  else if (data.name.substring(0, 4) === 'conn'){
     this.conn = data.name;
+  }
 
   this.date = data.date || new Date();
 
@@ -49,7 +51,7 @@ module.exports.parse = function(lines, opts){
 
     if (match === null)
       return { line: line };
-  
+
     return new Entry(match);
   });
 };
