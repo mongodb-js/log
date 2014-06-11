@@ -19,18 +19,22 @@ function getEvent(msg){
 function Entry(data, opts){
   opts = opts || {};
   data = data || {};
-  
+
   opts.wrap = opts.wrap || 80;
 
   var match = regret('connectionAccepted', data.message);
 
-  if (match !== null)
+  if (match !== null){
     this.conn = 'conn' + match.connNum;
-  else if (data.name.substring(0, 4) === 'conn')
+  }
+  else if (data.name.substring(0, 4) === 'conn'){
     this.conn = data.name;
+  }
 
   this.date = data.date || new Date();
+
   this.event = getEvent(data.message);
+  this.line = data.line;
   this.message = data.message || '';
   this.name = data.name;
 }
@@ -44,7 +48,10 @@ module.exports.parse = function(lines, opts){
     return line && line.length > 0;
   }).map(function(line){
     var match = regret(/^mongodb.log/, line, opts);
-    match = match || {message: line};
+
+    if (match === null)
+      return { line: line };
+
     return new Entry(match);
   });
 };
