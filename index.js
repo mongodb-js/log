@@ -22,10 +22,10 @@ function Entry(data, opts){
   
   opts.wrap = opts.wrap || 80;
 
-  var res = regret('connectionAccepted', data.message);
+  var match = regret('connectionAccepted', data.message);
 
-  if (res !== null)
-    this.conn = 'conn' + res.connNum;
+  if (match !== null)
+    this.conn = 'conn' + match.connNum;
   else if (data.name.substring(0, 4) === 'conn')
     this.conn = data.name;
 
