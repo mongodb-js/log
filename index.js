@@ -25,6 +25,23 @@ function Entry(data, opts){
   this.message = data.message || '';
   this.date = data.date || new Date();
   this.event = getEvent(this.message);
+
+  // operation format
+  var match = regret('operation', data.message);
+  if (match !== null) {
+    console.log(data.message);
+    console.log(match);
+
+    this.collection = match.collection;
+    if (match.index !== null )
+     this.collection += '.' + match.index;
+
+    this.database = match.database;
+    this.operation = match.operation;
+
+    // remove
+    this.other = match.other;
+  }
 }
 
 module.exports.parse = function(lines, opts){
