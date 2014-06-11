@@ -32,7 +32,7 @@ function Entry(data, opts){
 
   if (match !== null)
     this.conn = 'conn' + match.connNum;
-  else if (data.name.substring(0, 4) === 'conn')
+  else if (data.thread.substring(0, 4) === 'conn')
     this.conn = data.thread;
 }
 
