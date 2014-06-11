@@ -31,8 +31,9 @@ below shows two lines with threads `conn611` and `initandlisten`.
 
 ```
 2014-05-16T10:39:00.938-0400 [conn611] end connection 127.0.0.1:57499 (22
-connections now open) 2014-05-16T10:50:13.450-0400 [initandlisten] recover :
-no journal files present, no recovery needed
+connections now open) 
+2014-05-16T10:50:13.450-0400 [initandlisten] recover : no journal files present,
+ no recovery needed
 ```
 
 The regex capture group is `thread`.
@@ -51,10 +52,11 @@ Example:
 
 ```
 2014-05-31T14:21:14.734-0400 [initandlisten] connection accepted from
-127.0.0.1:51786 #14 (3 connections now open) 2014-05-31T14:21:14.734-0400
-[conn14] command admin.$cmd command: isMaster { ismaster: 1 } keyUpdates:0
-numYields:0  reslen:371 0ms 2014-05-31T14:21:14.735-0400 [conn14] end
-connection 127.0.0.1:51786 (2 connections now open)
+127.0.0.1:51786 #14 (3 connections now open) 
+2014-05-31T14:21:14.734-0400 [conn14] command admin.$cmd command: isMaster 
+{ ismaster: 1 } keyUpdates:0 numYields:0  reslen:371 0ms 
+2014-05-31T14:21:14.735-0400 [conn14] end connection 127.0.0.1:51786 (2 
+connections now open)
 ```
 
 | line # |    `thread`   | `conn` |
