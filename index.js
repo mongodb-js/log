@@ -8,10 +8,9 @@ function errorMessage(msg){
 }
 
 function getEvent(msg){
-  if(msg.indexOf('exception') > -1){
+  if (msg.indexOf('exception') > -1) {
     return {name: 'error', data: errorMessage(msg)};
-  }
-  else if(msg.indexOf('waiting for connections') > -1){
+  } else if(msg.indexOf('waiting for connections') > -1){
     return {name: 'ready', data: {port: parseInt(/(\d+)/.exec(msg)[1], 10)}};
   }
   return null;
@@ -20,11 +19,23 @@ function getEvent(msg){
 function Entry(data, opts){
   opts = opts || {};
   data = data || {};
+
   opts.wrap = opts.wrap || 80;
-  this.name = data.name;
-  this.message = data.message || '';
+
+  // general format
   this.date = data.date || new Date();
-  this.event = getEvent(this.message);
+  this.event = getEvent(data.message);
+  this.line = data.line;
+  this.message = data.message || '';
+  this.name = data.name;
+
+  // connection accepted format
+  var match = regret('connectionAccepted', data.message);
+
+  if (match !== null)
+    this.conn = 'conn' + match.connNum;
+  else if (data.name.substring(0, 4) === 'conn')
+    this.conn = data.name;
 
   // operation format
   var match = regret('operation', data.message);
@@ -53,7 +64,10 @@ module.exports.parse = function(lines, opts){
     return line && line.length > 0;
   }).map(function(line){
     var match = regret(/^mongodb.log/, line, opts);
-    match = match || {message: line};
+
+    if (match === null)
+      return { line: line };
+
     return new Entry(match);
   });
 };
