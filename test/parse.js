@@ -8,6 +8,7 @@ describe('parse', function(){
     var res = log.parse(line)[0];
     assert.equal(res.name, 'initandlisten');
   });
+
   it('should match the old format', function(){
     var expected = {
       name: 'initandlisten',
@@ -17,8 +18,11 @@ describe('parse', function(){
     },
     line = 'Wed Mar 12 14:42:31 [initandlisten] db version v2.5.6-pre-',
     res = log.parse(line)[0];
-    assert.equal(res.name, 'initandlisten');
-    assert.deepEqual(expected, res);
+
+    assert.equal(res.event, expected.event);
+    assert.equal(res.date, expected.date);
+    assert.equal(res.message, expected.message);
+    assert.equal(res.name, expected.name);
   });
 
   it('should handle fatal errors', function(){
@@ -37,33 +41,33 @@ describe('parse', function(){
   it('should accept multiple lines', function(){
     var expected = [
       { name: 'conn611',
-      message: 'end connection 127.0.0.1:57499 (22 connections now open)',
-      date: '2014-05-16T10:39:00.938-0400',
-      event: null },
-    { name: 'clientcursormon',
-      message: 'mem (MB) res:9 virt:3514',
-      date: '2014-05-16T10:43:24.840-0400',
-      event: null },
-    { name: 'clientcursormon',
-      message: ' mapped (incl journal view):960',
-      date: '2014-05-16T10:43:24.840-0400',
-      event: null },
-    { name: 'clientcursormon',
-      message: ' connections:22',
-      date: '2014-05-16T10:43:24.840-0400',
-      event: null },
-    { name: 'clientcursormon',
-      message: 'mem (MB) res:9 virt:3514',
-      date: '2014-05-16T10:48:24.926-0400',
-      event: null },
-    { name: 'clientcursormon',
-      message: ' mapped (incl journal view):960',
-      date: '2014-05-16T10:48:24.926-0400',
-      event: null },
-    { name: 'clientcursormon',
-      message: ' connections:22',
-      date: '2014-05-16T10:48:24.926-0400',
-      event: null }
+        message: 'end connection 127.0.0.1:57499 (22 connections now open)',
+        date: '2014-05-16T10:39:00.938-0400',
+        event: null },
+      { name: 'clientcursormon',
+        message: 'mem (MB) res:9 virt:3514',
+        date: '2014-05-16T10:43:24.840-0400',
+        event: null },
+      { name: 'clientcursormon',
+        message: ' mapped (incl journal view):960',
+        date: '2014-05-16T10:43:24.840-0400',
+        event: null },
+      { name: 'clientcursormon',
+        message: ' connections:22',
+        date: '2014-05-16T10:43:24.840-0400',
+        event: null },
+      { name: 'clientcursormon',
+        message: 'mem (MB) res:9 virt:3514',
+        date: '2014-05-16T10:48:24.926-0400',
+        event: null },
+      { name: 'clientcursormon',
+        message: ' mapped (incl journal view):960',
+        date: '2014-05-16T10:48:24.926-0400',
+        event: null },
+      { name: 'clientcursormon',
+        message: ' connections:22',
+        date: '2014-05-16T10:48:24.926-0400',
+        event: null }
     ],
     lines = [
       '2014-05-16T10:39:00.938-0400 [conn611] end connection 127.0.0.1:57499 ' +
@@ -78,8 +82,12 @@ describe('parse', function(){
       '2014-05-16T10:48:24.926-0400 [clientcursormon]  connections:22'
     ], res = log.parse(lines);
 
-    for (var i = 0; i < expected.length; i++)
-      assert.deepEqual(expected[i], res[i]);
+    for (var i = 0; i < expected.length; i++) {
+      assert.equal(res.event, expected.event);
+      assert.equal(res.date, expected.date);
+      assert.equal(res.message, expected.message);
+      assert.equal(res.name, expected.name);
+    }
   });
 
   it('should grok the ready event', function(){
@@ -102,9 +110,14 @@ describe('parse', function(){
       '2014-05-16T10:50:13.579-0400 [initandlisten] waiting for connections ' +
       'on port 27017'
     ], res = log.parse(lines);
-    assert.deepEqual(expected, res);
-  });
 
+    for (var i = 0; i < expected.length; i++) {
+      assert.equal(res.event, expected.event);
+      assert.equal(res.date, expected.date);
+      assert.equal(res.message, expected.message);
+      assert.equal(res.name, expected.name);
+    }
+  });
 
   // Wed Jan  1 12:45:05.102 [conn3] build index twitter.tweets  \
   // { lang: 1.0, protected: 1.0 }
