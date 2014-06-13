@@ -71,11 +71,22 @@ Some log lines are "operations" (query, getmore, update, delete, command).
 These do not match up with the `OP_*` opcodes of the wire protocol (e.g.
 commands are queries on a special `.$cmd` collection), but should be seen as
 "logical" operations. Operations have a type (query, getmore, update, delete,
-command), a namespace on which the operation is executed (consisting of
-database.collection) and a duration in milliseconds.
+command), a namespace on which the operation is executed and a duration in 
+milliseconds.
+
+namespace format:
+namespace = <database name>.<collection name>
+- database names cannot have a "."
+- anything after the first "." is the collection name
+  - the collection name also includes the index name
+    - index name being of $<index name>
+  e.g. admin.system.system1.system.$index
+    database   = "admin",
+    collection = "system.system1.system2.$index",
+    index = "index"
 
 The exposed regex capture groups are `operation`, `namespace`, `database`,
-`collection`, `duration`.
+`collection`, `duration` and 'index'.
 
 Some other events do not follow the operations pattern but still have a
 duration that is useful to extract, for example:

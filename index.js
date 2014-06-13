@@ -51,13 +51,9 @@ function Entry(data, opts){
   if (operationTypes.contains(this.split_tokens[2])) {
     var lastToken = this.split_tokens.slice(-1)[0];
     this.duration = lastToken.substring(0, lastToken.length - 2);
-
-    this.namespace = this.split_tokens[3];
-    var namespaceTokens = this.namespace.split('.');
-    this.database = namespaceTokens[0];
-    this.collection = namespaceTokens.slice(1).join('.');
-
     this.operation = this.split_tokens[2];
+
+    parseNamespaceFields(this);
 
     var colonIndex, key, token;
 
@@ -74,6 +70,18 @@ function Entry(data, opts){
       }
     }
   }
+}
+
+function parseNamespaceFields(thisObj) {
+  thisObj.namespace = thisObj.split_tokens[3];
+
+  var namespaceTokens = thisObj.namespace.split('.');
+  thisObj.database = namespaceTokens[0];
+  thisObj.collection = namespaceTokens.slice(1).join('.');
+
+  var lastToken = namespaceTokens.slice(-1)[0];
+  if (lastToken[0] === '$')
+    thisObj.index = lastToken.substring(1);
 }
 
 module.exports.parse = function(lines, opts){
