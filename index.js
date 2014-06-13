@@ -1,6 +1,9 @@
 var regret    = require('./patterns'),
-    Set       = require('set'),
-    fields    = new Set([ 'query' ]);
+    Set       = require('set');
+
+// the values of these stats will be non-negative integers so {0, 1, 2, ...}
+var operationStats = new Set([ 'keyUpdates', 'nreturned', 'nscanned', 
+  'nscannedObjects', 'ntoskip', 'ntoreturn', 'numYields', 'reslen']);
 
 function errorMessage(msg){
   if(msg.indexOf('mongod instance already running?') > -1){
@@ -55,96 +58,20 @@ function Entry(data, opts){
     this.operation = match.operation;
     this.namespace = this.database + '.' + this.collection;
 
-    var leftParenCount, parsingBrackets, rightParenCount, queryStartIndex,
-      parsingFieldName, token;
+    var colonIndex, key, token;
 
-    // parsing other operation fields
     for (var i = 4; i < this.split_tokens.length; i++) {
-      var token = this.split_tokens[i];
+      token = this.split_tokens[i];
+      colonIndex = token.search(':');
 
-      if (token == 'orderby:' || token == 'query:') {
+      // parsing operation stat fields
+      if (colonIndex) {
+        key = token.substring(0, colonIndex);
 
-        if (token == 'orderby:') parsingFieldName = 'sort_shape';
-        else if (token == 'query:') parsingFieldName = 'query';
-
-        leftParenCount = 0;
-        parsingBrackets = true;
-        rightParenCount = 0;
-        queryStartIndex = i + 1;
-
-      } else if (parsingBrackets) {
-
-        if (token == '{') leftParenCount++;
-        else if (token == '}' || token == '},') rightParenCount++;
-
-        if (token == '},') this.split_tokens[i] = '}';
-
-        if (leftParenCount == rightParenCount) {
-          var fieldTokens = this.split_tokens.slice(queryStartIndex, i + 1);
-
-          parsingBrackets = false;
-          this[parsingFieldName] = fieldTokens.join(' ');
-
-          // query_shape field e.g.
-          // if query = { foo: "value", bar: "another value" }
-          // then query_shape = { foo: 1, bar: 1 }
-          if (parsingFieldName == 'query') {
-            console.log(fieldTokens);
-
-            // for (var i = 0; i < fieldTokens.length; i++) {
-
-            //   // the token is the value of a key value pair e.g. key: "value"
-            //   if (fieldTokens[i][0] == '\"')
-            //     if (fieldTokens[i].slice(-1) == '\"') 
-            //       fieldTokens[i] = '1';
-            //     else if (fieldTokens[i].slice(-2) == '\",') 
-            //       fieldTokens[i] = '1,';
-            //     else
-
-            // // JSON.parse requires that the keys are surrouned by double quotes
-            // // e.g. { foo: "value", bar: "another value" } should be
-            // //      "{"foo":"value","var":"another value"}"
-            // for (var i = 0; i < fieldTokens.length; i++) {
-            //   if (fieldTokens[i].slice(-1) == ':') {
-            //     fieldTokens[i] = '\"' + fieldTokens[i].
-            //       substring(0, fieldTokens[i].length - 1) + '\"';
-            //     fieldTokens.splice(i + 1, 0, ':');
-            //     i++;
-            //   }
-            // }
-
-            // console.log('the query');
-            // console.log('\"' + fieldTokens.join('') + '\"');
-            // console.log('should be: ');
-            // console.log('{\"foo\":\"value\",\"var\":\"another value\"}');
-
-            // var queryObject = JSON.parse('\"' + fieldTokens.join('') + '\"');
-
-            // for (var i = 0; i < fieldTokens.length; i++) {
-
-            //   // the token is the value of a key value pair e.g. key: "value"
-            //   if (fieldTokens[i][0] == '\"')
-            //     if (fieldTokens[i].slice(-1) == '\"') 
-            //       fieldTokens[i] = '1';
-            //     else if (fieldTokens[i].slice(-2) == '\",') 
-            //       fieldTokens[i] = '1,';
-            //     else
-
-
-            // }
-
-            this.query_shape = fieldTokens.join(' ');
-          }
-        }
-
+        if (operationStats.contains(key))
+          this[key] = token.substring(colonIndex + 1); 
       }
-      // if (fields.contains(this.split_tokens[i]).substring(0, -1)) {
- 
-      // }
     }
-
-    // remove
-    this.other = match.other;
   }
 }
 
