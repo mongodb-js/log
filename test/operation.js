@@ -3,7 +3,7 @@ var assert = require('assert'),
 
 describe('parse', function() {
   // query operation
-  it('should match parse the query operation fields', function() {
+  it('should match parse the query operation stats', function() {
     var lines = [
       '2014-06-02T14:26:48.300-0400 [initandlisten] query admin.system ' +
         'planSummary: EOF ntoreturn:0 ntoskip:0 nscanned:0 nscannedObjects:0 ' + 
