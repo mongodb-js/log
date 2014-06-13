@@ -1,4 +1,11 @@
-var regret = require('./patterns');
+var regret    = require('./patterns'),
+    Set       = require('set');
+
+// the values of these stats will be non-negative integers so {0, 1, 2, ...}
+var operationStats = new Set([ 'keyUpdates', 'nmoved', 'nreturned', 'nscanned', 
+  'nscannedObjects', 'ntoskip', 'ntoreturn', 'numYields', 'reslen' ]),
+    operationTypes = new Set([ 'command', 'delete', 'getmore', 'query', 
+  'update' ]);
 
 function errorMessage(msg){
   if(msg.indexOf('mongod instance already running?') > -1){
@@ -22,6 +29,7 @@ function Entry(data, opts){
 
   opts.wrap = opts.wrap || 80;
 
+  // general fields
   this.date = data.date || new Date();
   this.event = getEvent(data.message);
   this.line = data.line;
@@ -29,12 +37,43 @@ function Entry(data, opts){
   this.split_tokens = data.line.split(' ');
   this.thread = data.thread;
 
-  var match = regret('connectionAccepted', data.message);
+  var match;
+
+  // connection accepted format
+  match = regret('connectionAccepted', data.message);
 
   if (match !== null)
     this.conn = 'conn' + match.connNum;
   else if (data.thread.substring(0, 4) === 'conn')
     this.conn = data.thread;
+
+  // operation format
+  if (operationTypes.contains(this.split_tokens[2])) {
+    var lastToken = this.split_tokens.slice(-1)[0];
+    this.duration = lastToken.substring(0, lastToken.length - 2);
+
+    this.namespace = this.split_tokens[3];
+    var namespaceTokens = this.namespace.split('.');
+    this.database = namespaceTokens[0];
+    this.collection = namespaceTokens.slice(1).join('.');
+
+    this.operation = this.split_tokens[2];
+
+    var colonIndex, key, token;
+
+    for (var i = 4; i < this.split_tokens.length; i++) {
+      token = this.split_tokens[i];
+      colonIndex = token.search(':');
+
+      // parsing operation stat fields
+      if (colonIndex) {
+        key = token.substring(0, colonIndex);
+
+        if (operationStats.contains(key))
+          this[key] = token.substring(colonIndex + 1); 
+      }
+    }
+  }
 }
 
 module.exports.parse = function(lines, opts){
