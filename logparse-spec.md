@@ -160,29 +160,32 @@ some data specific to the event. They are returned as a document of the form
 
 ## Full list of names to extract
 
-- `timestamp`
-- `timestamp_format`
-- `thread`
-- `conn`
-- `operation`
-- `namespace`
-- `database`
-- `collection`
-- `duration`
-- `query`
-- `query_shape`
-- `sort_shape`
-- `nscanned`
-- `ntoreturn`
-- `ntoskip`
-- `nupdated`
-- `nreturned`
-- `ninserted`
-- `ndeleted`
-- `nmoved`
-- `numYields`
-- `r`
-- `w`
-- `event`
+- [x] `R`
+- [x] `W`
+- [ ] `timestamp`
+- [ ] `timestamp_format`
+- [x] `thread`
+- [x] `conn`
+- [x] `operation`
+- [x] `namespace`
+- [x] `database`
+- [x] `collection`
+- [x] `duration`
+- [ ] `query`
+- [ ] `query_shape`
+- [ ] `sort_shape`
+- [x] `index`
+- [x] `nscanned`
+- [x] `ntoreturn`
+- [x] `ntoskip`
+- [x] `nupdated`
+- [x] `nreturned`
+- [x] `ninserted`
+- [x] `ndeleted`
+- [x] `nmoved`
+- [x] `numYields`
+- [x] `r`
+- [x] `w`
+- [ ] `event`
 
 
