@@ -86,7 +86,7 @@ namespace = {{ database name }}.{{ collection name }}
     index = "index"
 
 The exposed regex capture groups are `operation`, `namespace`, `database`,
-`collection`, `duration` and 'index'.
+`collection`, `duration` and `index`.
 
 Some other events do not follow the operations pattern but still have a
 duration that is useful to extract, for example:
