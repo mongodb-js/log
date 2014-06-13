@@ -8,11 +8,11 @@ describe('parse', function() {
       '2014-06-02T14:26:48.300-0400 [initandlisten] query admin.system.roles ' +
         'planSummary: EOF ntoreturn:0 ntoskip:0 nscanned:0 nscannedObjects:0 ' + 
         'keyUpdates:0 numYields:0 locks(micros) W:2347 r:243 nreturned:30000 ' +
-        'reslen:20 0ms',
+        'reslen:20 nmoved:11 0ms',
       '2014-06-02T14:27:48.300-0400 [TTLMonitor] query admin.system.indexes ' +
         'query: { expireAfterSeconds: { $exists: true } } planSummary: EOF ' +
         'ntoreturn:0 ntoskip:0 nscanned:0 nscannedObjects:0 keyUpdates:9001 ' + 
-        'numYields:0 locks(micros) r:568 nreturned:0 reslen:20 0ms'
+        'numYields:0 locks(micros) r:568 nreturned:0 reslen:20 nmoved:11 0ms'
     ],
     expected = [
       {
@@ -21,6 +21,7 @@ describe('parse', function() {
         duration: 0,
         keyUpdates: 0,
         namespace: 'admin.system.roles',
+        nmoved: 11,
         nreturned: 30000,
         nscanned: 0,
         nscannedObjects: 0,
@@ -36,6 +37,7 @@ describe('parse', function() {
         duration: 0,
         keyUpdates: 9001,
         namespace: 'admin.system.indexes',
+        nmoved: 11,
         nreturned: 0,
         nscanned: 0,
         nscannedObjects: 0,

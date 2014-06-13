@@ -2,7 +2,7 @@ var regret    = require('./patterns'),
     Set       = require('set');
 
 // the values of these stats will be non-negative integers so {0, 1, 2, ...}
-var operationStats = new Set([ 'keyUpdates', 'nreturned', 'nscanned', 
+var operationStats = new Set([ 'keyUpdates', 'nmoved', 'nreturned', 'nscanned', 
   'nscannedObjects', 'ntoskip', 'ntoreturn', 'numYields', 'reslen']);
 
 function errorMessage(msg){
