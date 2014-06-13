@@ -3,7 +3,7 @@ var assert = require('assert'),
 
 describe('parse', function() {
   it('should match the timestamp from each log line', function() {
-    var data = {
+    var timestampFormats = {
       'ctime': [
         'Wed Mar  2 14:42:31.000',
         'Wed Mar 12 14:42:31.000'
@@ -24,16 +24,17 @@ describe('parse', function() {
       ]
     }
 
-    for (var dateFormat in data) {
-      var dates = data[dateFormat];
+    for (var timestampFormat in timestampFormats) {
+      var timestamps = timestampFormats[timestampFormat];
 
-      for (var i = 0; i < dates.length; i++) {
-        var date = dates[i];
+      for (var i = 0; i < timestamps.length; i++) {
+        var timestamp = timestamps[i];
 
-        var line = date + ' [initandlisten] db version v2.5.6 -pre-';
+        var line = timestamp + ' [initandlisten] db version v2.5.6 -pre-';
         var res = log.parse(line)[0];
 
-        assert.equal(res.date, date);
+        assert.equal(res.timestamp_format, );
+        assert.equal(res.timestamp, timestamp);
       }
     }
   });

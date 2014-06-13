@@ -30,7 +30,18 @@ function Entry(data, opts){
   opts.wrap = opts.wrap || 80;
 
   // general fields
-  this.date = data.date || new Date();
+  this.timestamp = data.timestamp || new Date();
+  var tsLength = this.timestamp.length;
+
+  if (tsLength == 23)
+    this.timestamp_format = 'ctime';
+  else if (tsLength == 19)
+    this.timestamp_format = 'ctime-pre2.4';
+  else if (tsLength == 28)
+    this.timestamp_format = 'iso8601-local';
+  else if (tsLength == 24)
+    this.timestamp_format = 'iso8601-utc';
+
   this.event = getEvent(data.message);
   this.line = data.line;
   this.message = data.message || '';
