@@ -28,8 +28,7 @@ regret.add(
 regret.add(
   'operation',
   new RegExp('^(command|delete|getmore|query|update) ' + 
-    '([^\\.]*)\\.([^\\.]*)\\.?([^\\.\\s]*)? ' +
-    '(?:query: )?(.*)'),
+    '([^\\.]*)\\.([^\\.]*)\\.?([^\\.\\s]*)? (?:.*)'),
   '2014-02-13T18:00:04.709-0500',
   ['operation', 'database', 'collection', 'index', 'other']
 );
