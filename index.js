@@ -27,7 +27,7 @@ function Entry(data, opts){
 
   opts.wrap = opts.wrap || 80;
 
-  // general format
+  // general fields
   this.date = data.date || new Date();
   this.event = getEvent(data.message);
   this.line = data.line;
@@ -54,7 +54,11 @@ function Entry(data, opts){
       this.collection += '.' + match.index;
 
     this.database = match.database;
-    this.duration = this.split_tokens.slice(-1)[0].substring(0, -2);
+
+    var lastToken = this.split_tokens.slice(-1)[0];
+
+    this.duration = lastToken.substring(0, lastToken.length - 2);
+
     this.operation = match.operation;
     this.namespace = this.database + '.' + this.collection;
 
