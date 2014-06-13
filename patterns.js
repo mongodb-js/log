@@ -30,7 +30,7 @@ regret.add(
   new RegExp('^(command|delete|getmore|query|update) ' + 
     '([^\\.]*)\\.([^\\.]*)\\.?([^\\.\\s]*)? (?:.*)'),
   '2014-02-13T18:00:04.709-0500',
-  ['operation', 'database', 'collection', 'index', 'other']
+  ['operation', 'database', 'collection', 'index']
 );
 
 regret.add(

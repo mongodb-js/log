@@ -56,11 +56,10 @@ function Entry(data, opts){
     this.database = match.database;
 
     var lastToken = this.split_tokens.slice(-1)[0];
-
     this.duration = lastToken.substring(0, lastToken.length - 2);
 
-    this.operation = match.operation;
     this.namespace = this.database + '.' + this.collection;
+    this.operation = match.operation;
 
     var colonIndex, key, token;
 
