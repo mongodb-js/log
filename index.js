@@ -1,11 +1,14 @@
 var regret    = require('./patterns'),
     Set       = require('set');
 
-// the values of these stats will be non-negative integers so {0, 1, 2, ...}
-var operationStats = new Set([ 'keyUpdates', 'nmoved', 'nreturned', 'nscanned', 
-  'nscannedObjects', 'ntoskip', 'ntoreturn', 'numYields', 'reslen' ]),
-    operationTypes = new Set([ 'command', 'delete', 'getmore', 'query', 
-  'update' ]);
+var operationTypes = new Set([ 
+  'command', 
+  'delete', 
+  'getmore', 
+  'query', 
+  'remove', 
+  'update' 
+]);
 
 function errorMessage(msg){
   if(msg.indexOf('mongod instance already running?') > -1){
@@ -55,7 +58,7 @@ function Entry(data, opts){
 
     parseNamespaceFields(this);
 
-    var colonIndex, key, token;
+    var colonIndex, key, token, intValue;
 
     for (var i = 4; i < this.split_tokens.length; i++) {
       token = this.split_tokens[i];
@@ -64,9 +67,10 @@ function Entry(data, opts){
       // parsing operation stat fields
       if (colonIndex) {
         key = token.substring(0, colonIndex);
+        intValue = parseInt(token.substring(colonIndex + 1));
 
-        if (operationStats.contains(key))
-          this[key] = token.substring(colonIndex + 1); 
+        if (!isNaN(intValue))
+          this[key] = intValue; 
       }
     }
   }
