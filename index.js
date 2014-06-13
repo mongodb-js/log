@@ -3,7 +3,9 @@ var regret    = require('./patterns'),
 
 // the values of these stats will be non-negative integers so {0, 1, 2, ...}
 var operationStats = new Set([ 'keyUpdates', 'nmoved', 'nreturned', 'nscanned', 
-  'nscannedObjects', 'ntoskip', 'ntoreturn', 'numYields', 'reslen']);
+  'nscannedObjects', 'ntoskip', 'ntoreturn', 'numYields', 'reslen' ]),
+    operationTypes = new Set([ 'command', 'delete', 'getmore', 'query', 
+  'update' ]);
 
 function errorMessage(msg){
   if(msg.indexOf('mongod instance already running?') > -1){
@@ -46,20 +48,16 @@ function Entry(data, opts){
     this.conn = data.thread;
 
   // operation format
-  match = regret('operation', data.message);
-
-  if (match !== null) {
-    this.collection = match.collection;
-    if (match.index !== null ) 
-      this.collection += '.' + match.index;
-
-    this.database = match.database;
-
+  if (operationTypes.contains(this.split_tokens[2])) {
     var lastToken = this.split_tokens.slice(-1)[0];
     this.duration = lastToken.substring(0, lastToken.length - 2);
 
-    this.namespace = this.database + '.' + this.collection;
-    this.operation = match.operation;
+    this.namespace = this.split_tokens[3];
+    var namespaceTokens = this.namespace.split('.');
+    this.database = namespaceTokens[0];
+    this.collection = namespaceTokens.slice(1).join('.');
+
+    this.operation = this.split_tokens[2];
 
     var colonIndex, key, token;
 
