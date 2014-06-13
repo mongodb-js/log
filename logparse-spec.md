@@ -71,11 +71,22 @@ Some log lines are "operations" (query, getmore, update, delete, command).
 These do not match up with the `OP_*` opcodes of the wire protocol (e.g.
 commands are queries on a special `.$cmd` collection), but should be seen as
 "logical" operations. Operations have a type (query, getmore, update, delete,
-command), a namespace on which the operation is executed (consisting of
-database.collection) and a duration in milliseconds.
+command), a namespace on which the operation is executed and a duration in 
+milliseconds.
+
+namespace format:
+namespace = {{ database name }}.{{ collection name }}
+- database names cannot have a "."
+- anything after the first "." is the collection name
+  - the collection name also includes the index name
+    - index name being of ${{ index name }}
+  e.g. admin.system.system1.system.$index
+    database   = "admin",
+    collection = "system.system1.system2.$index",
+    index = "index"
 
 The exposed regex capture groups are `operation`, `namespace`, `database`,
-`collection`, `duration`.
+`collection`, `duration` and `index`.
 
 Some other events do not follow the operations pattern but still have a
 duration that is useful to extract, for example:
@@ -160,29 +171,32 @@ some data specific to the event. They are returned as a document of the form
 
 ## Full list of names to extract
 
-- `timestamp`
-- `timestamp_format`
-- `thread`
-- `conn`
-- `operation`
-- `namespace`
-- `database`
-- `collection`
-- `duration`
-- `query`
-- `query_shape`
-- `sort_shape`
-- `nscanned`
-- `ntoreturn`
-- `ntoskip`
-- `nupdated`
-- `nreturned`
-- `ninserted`
-- `ndeleted`
-- `nmoved`
-- `numYields`
-- `r`
-- `w`
-- `event`
+- [x] `R`
+- [x] `W`
+- [ ] `timestamp`
+- [ ] `timestamp_format`
+- [x] `thread`
+- [x] `conn`
+- [x] `operation`
+- [x] `namespace`
+- [x] `database`
+- [x] `collection`
+- [x] `duration`
+- [ ] `query`
+- [ ] `query_shape`
+- [ ] `sort_shape`
+- [x] `index`
+- [x] `nscanned`
+- [x] `ntoreturn`
+- [x] `ntoskip`
+- [x] `nupdated`
+- [x] `nreturned`
+- [x] `ninserted`
+- [x] `ndeleted`
+- [x] `nmoved`
+- [x] `numYields`
+- [x] `r`
+- [x] `w`
+- [ ] `event`
 
 
