@@ -75,11 +75,11 @@ command), a namespace on which the operation is executed and a duration in
 milliseconds.
 
 namespace format:
-namespace = <database name>.<collection name>
+namespace = {{ database name }}.{{ collection name }}
 - database names cannot have a "."
 - anything after the first "." is the collection name
   - the collection name also includes the index name
-    - index name being of $<index name>
+    - index name being of ${{ index name }}
   e.g. admin.system.system1.system.$index
     database   = "admin",
     collection = "system.system1.system2.$index",
