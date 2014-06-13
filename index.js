@@ -26,6 +26,7 @@ function Entry(data, opts){
   this.event = getEvent(data.message);
   this.line = data.line;
   this.message = data.message || '';
+  this.split_tokens = data.line.split(' ');
   this.thread = data.thread;
 
   var match = regret('connectionAccepted', data.message);
