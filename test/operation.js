@@ -2,7 +2,57 @@ var assert = require('assert'),
     log    = require('./..');
 
 describe('parse', function() {
-  it('should parse the query operation type and stat fields', function() {
+  // namespace fields
+  it('should parse the namespace field and it\'s related fields', 
+    function() {
+      var namespaceFields = {
+        'admin.$index': {
+          'collection': '$index',
+          'database': 'admin',
+          'index': 'index'
+        },
+        'admin.system': {
+          'collection': 'system',
+          'database': 'admin'
+        },
+        'admin.system.$index': {
+          'collection': 'system.$index',
+          'database': 'admin',
+          'index': 'index'
+        },
+        'admin.system1.system2.system3': {
+          'collection': 'system1.system2.system3',
+          'database': 'admin'
+        },
+        'admin.system1.system2.system3.$index': {
+          'collection': 'system1.system2.system3.$index',
+          'database': 'admin',
+          'index': 'index'
+        }
+      };
+
+      var line, res;
+
+      for (var namespace in namespaceFields) {
+        line = '2014-06-02T14:26:48.300-0400 [initandlisten] query ' + 
+          namespace + ' planSummary: EOF ntoreturn:0 ntoskip:0 ' + 
+          'nscanned:0 nscannedObjects:0 keyUpdates:0 numYields:0 ' + 
+          'locks(micros) W:2347 r:243 nreturned:30000 reslen:20 nmoved:11 ' + 
+          '900000ms';
+
+        res = log.parse(line);
+        assert.equal(res[0].namespace, namespace);
+
+        for (var expectedField in namespaceFields[namespace]) {
+          assert.equal(res[0][expectedField], 
+            namespaceFields[namespace][expectedField]);
+        }
+      }
+    }
+  );
+
+  // operation type and stats
+  it('should parse the query operation type and stats', function() {
     var lines = [
       '2014-06-02T14:26:48.300-0400 [initandlisten] command admin.system ' +
         'planSummary: EOF ntoreturn:0 ntoskip:0 nscanned:0 nscannedObjects:0 ' + 
@@ -62,52 +112,35 @@ describe('parse', function() {
         assert.equal(res[i][key], expected[i][key]);
   });
 
-  it('should parse the namespace field and it\'s related fields', 
-    function() {
-      var namespaceFields = {
-        'admin.$index': {
-          'collection': '$index',
-          'database': 'admin',
-          'index': 'index'
-        },
-        'admin.system': {
-          'collection': 'system',
-          'database': 'admin'
-        },
-        'admin.system.$index': {
-          'collection': 'system.$index',
-          'database': 'admin',
-          'index': 'index'
-        },
-        'admin.system1.system2.system3': {
-          'collection': 'system1.system2.system3',
-          'database': 'admin'
-        },
-        'admin.system1.system2.system3.$index': {
-          'collection': 'system1.system2.system3.$index',
-          'database': 'admin',
-          'index': 'index'
-        }
-      };
+  // query field
+  it('should parse the query field or nested query field', function() {
+    var queries = [
+      '{ field1: { field2: { field3: \'val3\' }, field4: \'val4\' }, ' +
+        'field5: \'val5\' }',
+      '{ field1: { field2: { query: \'val3\' }, field4: \'val4\' }, ' +
+        'field5: \'val5\' }',
+      '{ field1: { query: { query: \'val3\' }, query: \'val4\' }, ' +
+        'query: { query: { query: \'val3\' }, field4: \'val4\' } }'
+    ],
+    expectedQueries = [
+      '{ field1: { field2: { field3: \'val3\' }, field4: \'val4\' }, ' +
+        'field5: \'val5\' }',
+      '{ field1: { field2: { query: \'val3\' }, field4: \'val4\' }, ' +
+        'field5: \'val5\' }',
+      '{ query: { query: \'val3\' }, field4: \'val4\' }'
+    ];
 
-      var line, res;
+    var line, res;
 
-      for (var namespace in namespaceFields) {
-        line = '2014-06-02T14:26:48.300-0400 [initandlisten] query ' + 
-          namespace + ' planSummary: EOF ntoreturn:0 ntoskip:0 ' + 
-          'nscanned:0 nscannedObjects:0 keyUpdates:0 numYields:0 ' + 
-          'locks(micros) W:2347 r:243 nreturned:30000 reslen:20 nmoved:11 ' + 
-          '900000ms';
+    for (var i = 0; i < queries.length; i++) {
+      line = '2014-06-02T14:27:48.300-0400 [TTLMonitor] query ' + 
+        'admin.system.indexes query: ' + queries[i] + ' planSummary: EOF ' + 
+        'ntoreturn:9 ntoskip:9 nscanned:99 nscannedObjects:0 keyUpdates:9001 ' + 
+        'numYields:9999 locks(micros) w:1111 R:568 nreturned:0 reslen:20 ' + 
+        'nmoved:11 ndeleted:100 nupdated:1000 0ms';
+      res = log.parse(line)[0];
 
-        res = log.parse(line);
-        assert.equal(res[0].namespace, namespace);
-
-        for (var expectedField in namespaceFields[namespace]) {
-          assert.equal(res[0][expectedField], 
-            namespaceFields[namespace][expectedField]);
-        }
-      }
+      assert.equal(res.query, expectedQueries[i]);
     }
-  );
-
+  });
 });

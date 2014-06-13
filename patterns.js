@@ -29,7 +29,7 @@ regret.add(
   'mongodb.log', 
   /(^({{ctime}}|{{iso8601}}) \[(\w+)\] (.*))/,
   '2014-02-13T18:00:04.709-0500 [initandlisten] db version v2.5.6-pre-',
-  ['line', 'date', 'thread', 'message']
+  ['line', 'timestamp', 'thread', 'message']
 );
 
 regret.add(

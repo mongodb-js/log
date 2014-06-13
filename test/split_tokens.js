@@ -15,6 +15,6 @@ describe('parse', function() {
     ],
     res = log.parse(line);
 
-    assert.deepEqual(res[0].split_tokens, expected);
+    assert.deepEqual(res[0].tokens, expected);
   });
 });

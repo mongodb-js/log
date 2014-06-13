@@ -173,8 +173,8 @@ some data specific to the event. They are returned as a document of the form
 
 - [x] `R`
 - [x] `W`
-- [ ] `timestamp`
-- [ ] `timestamp_format`
+- [x] `timestamp`
+- [x] `timestamp_format`
 - [x] `thread`
 - [x] `conn`
 - [x] `operation`
