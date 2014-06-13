@@ -30,17 +30,7 @@ function Entry(data, opts){
   opts.wrap = opts.wrap || 80;
 
   // general fields
-  this.timestamp = data.timestamp || new Date();
-  var tsLength = this.timestamp.length;
-
-  if (tsLength == 23)
-    this.timestamp_format = 'ctime';
-  else if (tsLength == 19)
-    this.timestamp_format = 'ctime-pre2.4';
-  else if (tsLength == 28)
-    this.timestamp_format = 'iso8601-local';
-  else if (tsLength == 24)
-    this.timestamp_format = 'iso8601-utc';
+  parseTimestampFields(this, data.timestamp);
 
   this.event = getEvent(data.message);
   this.line = data.line;
@@ -85,6 +75,21 @@ function Entry(data, opts){
       }
     }
   }
+}
+
+var timestampLengths = {
+  '19': 'ctime-pre2.4',
+  '23': 'ctime',
+  '24': 'iso8601-utc',
+  '28': 'iso8601-local'
+};
+
+function parseTimestampFields(thisObj, timestamp) {
+  thisObj.timestamp = timestamp || new Date();
+  var tsLength = thisObj.timestamp.length;
+
+  if (timestampLengths[tsLength] !== undefined)
+    thisObj.timestamp_format = timestampLengths[tsLength];
 }
 
 module.exports.parse = function(lines, opts){

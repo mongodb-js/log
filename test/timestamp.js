@@ -9,31 +9,32 @@ describe('parse', function() {
         'Wed Mar 12 14:42:31.000'
       ],
 
-      'ctimePreTwoPointFour': [
+      'ctime-pre2.4': [
         'Wed Mar  2 14:42:31',
         'Wed Mar 12 14:42:31'
       ],
 
-      'iso8601_local': [
+      'iso8601-local': [
         '2014-02-13T18:00:04.709-0500',
         '2014-02-13T18:00:04.709+0500'
       ],
 
-      'iso8601_utc': [
+      'iso8601-utc': [
         '2014-02-13T18:00:04.709Z',
       ]
     }
 
+    var line, timestamp, timestamps, res;
+
     for (var timestampFormat in timestampFormats) {
-      var timestamps = timestampFormats[timestampFormat];
+      timestamps = timestampFormats[timestampFormat];
 
       for (var i = 0; i < timestamps.length; i++) {
-        var timestamp = timestamps[i];
+        timestamp = timestamps[i];
+        line = timestamp + ' [initandlisten] db version v2.5.6 -pre-';
+        res = log.parse(line)[0];
 
-        var line = timestamp + ' [initandlisten] db version v2.5.6 -pre-';
-        var res = log.parse(line)[0];
-
-        assert.equal(res.timestamp_format, );
+        assert.equal(res.timestamp_format, timestampFormat);
         assert.equal(res.timestamp, timestamp);
       }
     }
