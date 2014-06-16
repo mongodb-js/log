@@ -132,6 +132,8 @@ function parseQuery(thisObj, parsingFirstNestedQuery, tokensIndex) {
   var queryStartIndex = tokensIndex;
   var token;
 
+  // when the number of left and right parentheses are equal, we've parsed the
+  // query object
   do {
     token = thisObj.tokens[tokensIndex];
 
@@ -141,6 +143,14 @@ function parseQuery(thisObj, parsingFirstNestedQuery, tokensIndex) {
         rightParenCount);
     }
 
+    // rare edge case handling:
+    // in the query object, we need to know if we're tokenzing tokens that are
+    // part of a string or regex
+    // why?
+    // when we know we're tokenzing parts of a string or a regex, we can ignore
+    // the 'query:' token because we know it's not a key that indicates a
+    // a nested query that needs to be parsed
+    // see test cases for examples 
     if (parsingRegex) {
       if (token.search('/') >= 0)
         parsingRegex = false;
@@ -150,15 +160,6 @@ function parseQuery(thisObj, parsingFirstNestedQuery, tokensIndex) {
     } else if (parsingDoubleQuotedString) {
       if (token.search('\"') >= 0) 
         parsingDoubleQuotedString = false;
-    } else if (!parsingFirstNestedQuery && token === 'query:' &&
-        (leftParenCount - rightParenCount) === 1) {
-
-      return parseQuery(thisObj, true, tokensIndex);
-
-    } else if (token === '{') {
-      leftParenCount++;
-    } else if (token === '}' || token === '},') {
-      rightParenCount++;
     } else if (tokenBeginsExpression('/', token)) {
       parsingRegex = true;
     } else if (tokenBeginsExpression('\'', token)) {
@@ -166,6 +167,19 @@ function parseQuery(thisObj, parsingFirstNestedQuery, tokensIndex) {
     } else if (tokenBeginsExpression('\"', token)) {
       parsingDoubleQuotedString = true;
     }
+
+    // handles the nested query object case, see test cases
+    else if (!parsingFirstNestedQuery && token === 'query:' &&
+        (leftParenCount - rightParenCount) === 1) {
+
+      return parseQuery(thisObj, true, tokensIndex);
+
+    // parenthesis count
+    } else if (token === '{') {
+      leftParenCount++;
+    } else if (token === '}' || token === '},') {
+      rightParenCount++;
+    } 
 
     tokensIndex++;
   } while (leftParenCount !== rightParenCount);
