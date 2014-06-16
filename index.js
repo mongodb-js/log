@@ -112,9 +112,10 @@ function parseOperationStats(thisObj, token) {
 
 function parseQuery(thisObj, parsingFirstNestedQuery, tokensIndex) {
   var debug = false;
-  tokensIndex = tokensIndex || 4;
 
-  // if there is a operations query field, it'd be the fifth token
+  // if there is a operations query field, it'd be the fifth token,
+  // unless we're parsing a nested query
+  tokensIndex = tokensIndex || 4;
   if (thisObj.tokens[tokensIndex] !== 'query:')
     return tokensIndex;
 
