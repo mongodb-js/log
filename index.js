@@ -95,34 +95,60 @@ function parseOperationStats(thisObj, token) {
   }
 }
 
-function parseQuery(thisObj) {
-  // if there is a operations query field, it'd be the fifth token
-  if (thisObj.tokens[4] !== 'query:')
-    return 4;
+function parseQuery(thisObj, parsingFirstNestedQuery, tokensIndex) {
+  debug = false;
+  tokensIndex = tokensIndex || 4;
 
-  var leftParenCount = 0, parsingFirstNestedQuery = false, queryStartIndex = 5, 
-    rightParenCount = 0, token, tokensIndex = 5;
+  // if there is a operations query field, it'd be the fifth token
+  if (thisObj.tokens[tokensIndex] !== 'query:')
+    return tokensIndex;
+
+  if (debug)
+    console.log(thisObj.line);
+
+  tokensIndex++;
+  parsingFirstNestedQuery = (typeof parsingFirstNestedQuery !== 'undefined') ? 
+    parsingFirstNestedQuery : false;
+
+  var leftParenCount = 0, rightParenCount = 0;
+  var parsingRegex = false, parsingSingleQuotedString = false, 
+    parsingDoubleQuotedString = false;
+  var queryStartIndex = tokensIndex;
+  var token;
 
   do {
     token = thisObj.tokens[tokensIndex];
 
-    if (token === 'query:' && !parsingFirstNestedQuery && 
-        (leftParenCount - rightParenCount) === 1) {
-      // it's safe to assume that the next token will be a '{' since the first
-      // nested query's value will be an object so we'll skip to the next next 
-      // token
-      leftParenCount = 1;
-      queryStartIndex = tokensIndex + 1;
-      rightParenCount = 0;
-      tokensIndex += 2;
+    if (debug) {
+      console.log('token: ' + token);
+      console.log('leftParenCount: ' + leftParenCount + ' rightParenCount: ' + 
+        rightParenCount);
+    }
 
-      // ensures that we only parse the first nested query key and no other 
-      // query key
-      parsingFirstNestedQuery = true;
+    if (parsingRegex) {
+      if (token.search('/') >= 0)
+        parsingRegex = false;
+    } else if (parsingSingleQuotedString) {
+      if (token.search('\'') >= 0) 
+        parsingSingleQuotedString = false;
+    } else if (parsingDoubleQuotedString) {
+      if (token.search('\"') >= 0) 
+        parsingDoubleQuotedString = false;
+    } else if (!parsingFirstNestedQuery && token === 'query:' &&
+        (leftParenCount - rightParenCount) === 1) {
+
+      return parseQuery(thisObj, true, tokensIndex);
+
     } else if (token === '{') {
       leftParenCount++;
     } else if (token === '}' || token === '},') {
       rightParenCount++;
+    } else if (tokenBeginsExpression('/', token)) {
+      parsingRegex = true;
+    } else if (tokenBeginsExpression('\'', token)) {
+      parsingSingleQuotedString = true;
+    } else if (tokenBeginsExpression('\"', token)) {
+      parsingDoubleQuotedString = true;
     }
 
     tokensIndex++;
@@ -131,6 +157,11 @@ function parseQuery(thisObj) {
   thisObj.query = thisObj.tokens.slice(queryStartIndex, tokensIndex).join(' ');
 
   return tokensIndex;
+}
+
+function tokenBeginsExpression(exprSymbol, token) {
+  return token === exprSymbol || 
+    (token[0] === exprSymbol && token[token.length - 1] !== exprSymbol);
 }
 
 var timestampLengths = {

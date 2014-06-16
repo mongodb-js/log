@@ -120,14 +120,24 @@ describe('parse', function() {
       '{ field1: { field2: { query: \'val3\' }, field4: \'val4\' }, ' +
         'field5: \'val5\' }',
       '{ field1: { query: { query: \'val3\' }, query: \'val4\' }, ' +
-        'query: { query: { query: \'val3\' }, field4: \'val4\' } }'
+        'query: { query: { query: \'val3\' }, field4: \'val4\' } }',
+      '{ field1: /regex/ }',
+      '{ field1: /regex { query: regex/ }',
+      '{ field: /wefwef " query: acme.*corp/i }',
+      '{ field1: / { query: } /, query: { query: \' / val3 / aaa\' } }',
+      '{ field1: \'blah \" query: \" query: blah\' }'
     ],
     expectedQueries = [
       '{ field1: { field2: { field3: \'val3\' }, field4: \'val4\' }, ' +
         'field5: \'val5\' }',
       '{ field1: { field2: { query: \'val3\' }, field4: \'val4\' }, ' +
         'field5: \'val5\' }',
-      '{ query: { query: \'val3\' }, field4: \'val4\' }'
+      '{ query: { query: \'val3\' }, field4: \'val4\' }',
+      '{ field1: /regex/ }',
+      '{ field1: /regex { query: regex/ }',
+      '{ field: /wefwef " query: acme.*corp/i }',
+      '{ query: \' / val3 / aaa\' }',
+      '{ field1: \'blah \" query: \" query: blah\' }'
     ];
 
     var line, res;
