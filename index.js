@@ -96,7 +96,7 @@ function parseOperationStats(thisObj, token) {
 }
 
 function parseQuery(thisObj, parsingFirstNestedQuery, tokensIndex) {
-  debug = false;
+  var debug = false;
   tokensIndex = tokensIndex || 4;
 
   // if there is a operations query field, it'd be the fifth token
