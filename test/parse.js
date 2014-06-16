@@ -6,14 +6,14 @@ describe('parse', function(){
     var expected = {
       thread: 'initandlisten',
       message: 'db version v2.5.6-pre-',
-      date: 'Wed Mar 12 14:42:31',
+      timestamp: 'Wed Mar 12 14:42:31',
       event: null
     },
     line = 'Wed Mar 12 14:42:31 [initandlisten] db version v2.5.6-pre-',
     res = log.parse(line)[0];
 
     assert.equal(res.event, expected.event);
-    assert.equal(res.date, expected.date);
+    assert.equal(res.timestamp, expected.timestamp);
     assert.equal(res.message, expected.message);
     assert.equal(res.name, expected.name);
   });
@@ -35,31 +35,31 @@ describe('parse', function(){
     var expected = [
       { name: 'conn611',
         message: 'end connection 127.0.0.1:57499 (22 connections now open)',
-        date: '2014-05-16T10:39:00.938-0400',
+        timestamp: '2014-05-16T10:39:00.938-0400',
         event: null },
       { name: 'clientcursormon',
         message: 'mem (MB) res:9 virt:3514',
-        date: '2014-05-16T10:43:24.840-0400',
+        timestamp: '2014-05-16T10:43:24.840-0400',
         event: null },
       { name: 'clientcursormon',
         message: ' mapped (incl journal view):960',
-        date: '2014-05-16T10:43:24.840-0400',
+        timestamp: '2014-05-16T10:43:24.840-0400',
         event: null },
       { name: 'clientcursormon',
         message: ' connections:22',
-        date: '2014-05-16T10:43:24.840-0400',
+        timestamp: '2014-05-16T10:43:24.840-0400',
         event: null },
       { name: 'clientcursormon',
         message: 'mem (MB) res:9 virt:3514',
-        date: '2014-05-16T10:48:24.926-0400',
+        timestamp: '2014-05-16T10:48:24.926-0400',
         event: null },
       { name: 'clientcursormon',
         message: ' mapped (incl journal view):960',
-        date: '2014-05-16T10:48:24.926-0400',
+        timestamp: '2014-05-16T10:48:24.926-0400',
         event: null },
       { name: 'clientcursormon',
         message: ' connections:22',
-        date: '2014-05-16T10:48:24.926-0400',
+        timestamp: '2014-05-16T10:48:24.926-0400',
         event: null }
     ],
     lines = [
@@ -77,7 +77,7 @@ describe('parse', function(){
 
     for (var i = 0; i < expected.length; i++) {
       assert.equal(res.event, expected.event);
-      assert.equal(res.date, expected.date);
+      assert.equal(res.timestamp, expected.timestamp);
       assert.equal(res.message, expected.message);
       assert.equal(res.name, expected.name);
     }
@@ -87,13 +87,13 @@ describe('parse', function(){
     var expected = [
       { thread: 'initandlisten',
         message: 'recover : no journal files present, no recovery needed',
-        date: '2014-05-16T10:50:13.450-0400',
+        timestamp: '2014-05-16T10:50:13.450-0400',
         event: null
       },
       {
         thread: 'initandlisten',
         message: 'waiting for connections on port 27017',
-        date: '2014-05-16T10:50:13.579-0400',
+        timestamp: '2014-05-16T10:50:13.579-0400',
         event: { name: 'ready', data: { port: 27017 } }
       }
     ],
@@ -106,7 +106,7 @@ describe('parse', function(){
 
     for (var i = 0; i < expected.length; i++) {
       assert.equal(res.event, expected.event);
-      assert.equal(res.date, expected.date);
+      assert.equal(res.timestamp, expected.timestamp);
       assert.equal(res.message, expected.message);
       assert.equal(res.name, expected.name);
     }

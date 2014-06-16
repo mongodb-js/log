@@ -33,7 +33,8 @@ function Entry(data, opts){
   opts.wrap = opts.wrap || 80;
 
   // general fields
-  this.date = data.date || new Date();
+  parseTimestampFields(this, data.timestamp);
+
   this.event = getEvent(data.message);
   this.line = data.line;
   this.message = data.message || '';
@@ -74,6 +75,21 @@ function Entry(data, opts){
       }
     }
   }
+}
+
+var timestampLengths = {
+  '19': 'ctime-pre2.4',
+  '23': 'ctime',
+  '24': 'iso8601-utc',
+  '28': 'iso8601-local'
+};
+
+function parseTimestampFields(thisObj, timestamp) {
+  thisObj.timestamp = timestamp || new Date();
+  var tsLength = thisObj.timestamp.length;
+
+  if (timestampLengths[tsLength] !== undefined)
+    thisObj.timestamp_format = timestampLengths[tsLength];
 }
 
 function parseNamespaceFields(thisObj) {

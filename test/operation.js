@@ -2,7 +2,7 @@ var assert = require('assert'),
     log    = require('./..');
 
 describe('parse', function() {
-  it('should parse the query operation type and stat fields', function() {
+  it('should parse the query operation type and stats', function() {
     var lines = [
       '2014-06-02T14:26:48.300-0400 [initandlisten] command admin.system ' +
         'planSummary: EOF ntoreturn:0 ntoskip:0 nscanned:0 nscannedObjects:0 ' + 

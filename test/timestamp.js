@@ -2,38 +2,40 @@ var assert = require('assert'),
     log    = require('./..');
 
 describe('parse', function() {
-  it('should match the timestamp from each log line', function() {
-    var data = {
+  it('should parse the timestamp and the timestamp format', function() {
+    var timestampFormats = {
       'ctime': [
         'Wed Mar  2 14:42:31.000',
         'Wed Mar 12 14:42:31.000'
       ],
 
-      'ctimePreTwoPointFour': [
+      'ctime-pre2.4': [
         'Wed Mar  2 14:42:31',
         'Wed Mar 12 14:42:31'
       ],
 
-      'iso8601_local': [
+      'iso8601-local': [
         '2014-02-13T18:00:04.709-0500',
         '2014-02-13T18:00:04.709+0500'
       ],
 
-      'iso8601_utc': [
+      'iso8601-utc': [
         '2014-02-13T18:00:04.709Z',
       ]
     }
 
-    for (var dateFormat in data) {
-      var dates = data[dateFormat];
+    var line, timestamp, timestamps, res;
 
-      for (var i = 0; i < dates.length; i++) {
-        var date = dates[i];
+    for (var timestampFormat in timestampFormats) {
+      timestamps = timestampFormats[timestampFormat];
 
-        var line = date + ' [initandlisten] db version v2.5.6 -pre-';
-        var res = log.parse(line)[0];
+      for (var i = 0; i < timestamps.length; i++) {
+        timestamp = timestamps[i];
+        line = timestamp + ' [initandlisten] db version v2.5.6 -pre-';
+        res = log.parse(line)[0];
 
-        assert.equal(res.date, date);
+        assert.equal(res.timestamp_format, timestampFormat);
+        assert.equal(res.timestamp, timestamp);
       }
     }
   });
