@@ -1,4 +1,5 @@
-var regret    = require('./patterns'),
+var debug     = require('debug')('index'),
+    regret    = require('./patterns'),
     Set       = require('set');
 
 var operationTypes = new Set([ 
@@ -38,7 +39,7 @@ function Entry(data, opts){
   this.event = getEvent(data.message);
   this.line = data.line;
   this.message = data.message || '';
-  this.split_tokens = data.line.split(' ');
+  this.tokens = data.line.split(' ');
   this.thread = data.thread;
 
   var match;
@@ -52,27 +53,19 @@ function Entry(data, opts){
     this.conn = data.thread;
 
   // operation format
-  if (operationTypes.contains(this.split_tokens[2])) {
-    var lastToken = this.split_tokens.slice(-1)[0];
+  if (operationTypes.contains(this.tokens[2])) {
+    var lastToken = this.tokens.slice(-1)[0];
     this.duration = lastToken.substring(0, lastToken.length - 2);
-    this.operation = this.split_tokens[2];
+    this.operation = this.tokens[2];
 
     parseNamespaceFields(this);
 
-    var colonIndex, key, token, intValue;
+    var tokensIndex = parseQuery(this);
+    var token;
 
-    for (var i = 4; i < this.split_tokens.length; i++) {
-      token = this.split_tokens[i];
-      colonIndex = token.search(':');
-
-      // parsing operation stat fields
-      if (colonIndex) {
-        key = token.substring(0, colonIndex);
-        intValue = parseInt(token.substring(colonIndex + 1));
-
-        if (!isNaN(intValue))
-          this[key] = intValue; 
-      }
+    for (; tokensIndex < this.tokens.length; tokensIndex++) {
+      token = this.tokens[tokensIndex];
+      parseOperationStats(this, token);
     }
   }
 }
@@ -93,7 +86,7 @@ function parseTimestampFields(thisObj, timestamp) {
 }
 
 function parseNamespaceFields(thisObj) {
-  thisObj.namespace = thisObj.split_tokens[3];
+  thisObj.namespace = thisObj.tokens[3];
 
   var namespaceTokens = thisObj.namespace.split('.');
   thisObj.database = namespaceTokens[0];
@@ -102,6 +95,114 @@ function parseNamespaceFields(thisObj) {
   var lastToken = namespaceTokens.slice(-1)[0];
   if (lastToken[0] === '$')
     thisObj.index = lastToken.substring(1);
+}
+
+function parseOperationStats(thisObj, token) {
+  var colonIndex = token.search(':');
+  var key, intValue;
+
+  // parsing operation stat fields
+  if (colonIndex >= 1) {
+    key = token.substring(0, colonIndex);
+    intValue = parseInt(token.substring(colonIndex + 1));
+
+    if (!isNaN(intValue))
+      thisObj[key] = intValue; 
+  }
+}
+
+function parseQuery(thisObj, parsingFirstNestedQuery, tokensIndex) {
+  // if there is a operations query field, it'd be the fifth token,
+  // unless we're parsing a nested query
+  tokensIndex = tokensIndex || 4;
+  if (thisObj.tokens[tokensIndex] !== 'query:')
+    return tokensIndex;
+
+  debug(thisObj.line);
+
+  tokensIndex++;
+  parsingFirstNestedQuery = (typeof parsingFirstNestedQuery !== 'undefined') ? 
+    parsingFirstNestedQuery : false;
+
+  var leftParenCount = 0, rightParenCount = 0;
+  var parsingRegex = false, parsingSingleQuotedString = false, 
+    parsingDoubleQuotedString = false;
+  var queryStartIndex = tokensIndex;
+  var token;
+
+  // when the number of left and right parentheses are equal, we've parsed the
+  // query object
+  do {
+    token = thisObj.tokens[tokensIndex];
+
+    debug('token: ' + token);
+    debug('leftParenCount: ' + leftParenCount + ' rightParenCount: ' + 
+      rightParenCount);
+
+    // rare edge case handling:
+    // in the query object, we need to know if we're tokenzing tokens that are
+    // part of a string or regex
+    // why?
+    // when we know we're tokenzing parts of a string or a regex, we can ignore
+    // the 'query:' token because we know it's not a key that indicates a
+    // a nested query that needs to be parsed
+    // see test cases for examples 
+    if (parsingRegex) {
+      if (token.search('/') >= 0)
+        parsingRegex = false;
+    } else if (parsingSingleQuotedString) {
+      if (token.search('\'') >= 0) 
+        parsingSingleQuotedString = false;
+    } else if (parsingDoubleQuotedString) {
+      if (token.search('\"') >= 0) 
+        parsingDoubleQuotedString = false;
+    } else if (tokenBeginsExpression('/', token)) {
+      parsingRegex = true;
+    } else if (tokenBeginsExpression('\'', token)) {
+      parsingSingleQuotedString = true;
+    } else if (tokenBeginsExpression('\"', token)) {
+      parsingDoubleQuotedString = true;
+    }
+
+    // handles the nested query object case, see test cases
+    else if (!parsingFirstNestedQuery && token === 'query:' &&
+        (leftParenCount - rightParenCount) === 1) {
+
+      return parseQuery(thisObj, true, tokensIndex);
+
+    // parenthesis count
+    } else if (token === '{') {
+      leftParenCount++;
+    } else if (token === '}' || token === '},') {
+      rightParenCount++;
+    } 
+
+    tokensIndex++;
+  } while (leftParenCount !== rightParenCount);
+
+  thisObj.query = thisObj.tokens.slice(queryStartIndex, tokensIndex).join(' ');
+
+  return tokensIndex;
+}
+
+function tokenBeginsExpression(exprSymbol, token) {
+  return token === exprSymbol || 
+    (token[0] === exprSymbol && token[token.length - 1] !== exprSymbol);
+}
+
+var timestampLengths = {
+  '19': 'ctime-pre2.4',
+  '23': 'ctime',
+  '24': 'iso8601-utc',
+  '28': 'iso8601-local'
+};
+
+function parseTimestampFields(thisObj, timestamp) {
+  thisObj.timestamp = timestamp || new Date();
+  var tsLength = thisObj.timestamp.length;
+
+  if (timestampLengths[tsLength] !== undefined)
+    thisObj.timestamp_format = timestampLengths[tsLength];
 }
 
 module.exports.parse = function(lines, opts){
