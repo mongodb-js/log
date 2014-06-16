@@ -1,4 +1,5 @@
-var regret    = require('./patterns'),
+var debug     = require('debug')('index'),
+    regret    = require('./patterns'),
     Set       = require('set');
 
 var operationTypes = new Set([ 
@@ -111,16 +112,13 @@ function parseOperationStats(thisObj, token) {
 }
 
 function parseQuery(thisObj, parsingFirstNestedQuery, tokensIndex) {
-  var debug = false;
-
   // if there is a operations query field, it'd be the fifth token,
   // unless we're parsing a nested query
   tokensIndex = tokensIndex || 4;
   if (thisObj.tokens[tokensIndex] !== 'query:')
     return tokensIndex;
 
-  if (debug)
-    console.log(thisObj.line);
+  debug(thisObj.line);
 
   tokensIndex++;
   parsingFirstNestedQuery = (typeof parsingFirstNestedQuery !== 'undefined') ? 
@@ -137,11 +135,9 @@ function parseQuery(thisObj, parsingFirstNestedQuery, tokensIndex) {
   do {
     token = thisObj.tokens[tokensIndex];
 
-    if (debug) {
-      console.log('token: ' + token);
-      console.log('leftParenCount: ' + leftParenCount + ' rightParenCount: ' + 
-        rightParenCount);
-    }
+    debug('token: ' + token);
+    debug('leftParenCount: ' + leftParenCount + ' rightParenCount: ' + 
+      rightParenCount);
 
     // rare edge case handling:
     // in the query object, we need to know if we're tokenzing tokens that are
