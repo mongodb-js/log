@@ -182,9 +182,9 @@ some data specific to the event. They are returned as a document of the form
 - [x] `database`
 - [x] `collection`
 - [x] `duration`
-- [ ] `query`
+- [x] `query`
 - [ ] `query_shape`
-- [ ] `sort_shape`
+- [x] `sort_shape`
 - [x] `index`
 - [x] `nscanned`
 - [x] `ntoreturn`

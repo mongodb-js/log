@@ -59,8 +59,9 @@ function Entry(data, opts){
     this.operation = this.tokens[2];
 
     parseNamespaceFields(this);
+    parseObject('sort_shape', 'orderby:', this, 4, false);
 
-    var tokensIndex = parseQuery(this);
+    var tokensIndex = parseObject('query', 'query:', this, 4, false);
     var token;
 
     for (; tokensIndex < this.tokens.length; tokensIndex++) {
@@ -111,42 +112,38 @@ function parseOperationStats(thisObj, token) {
   }
 }
 
-function parseQuery(thisObj, parsingFirstNestedQuery, tokensIndex) {
-  // if there is a operations query field, it'd be the fifth token,
-  // unless we're parsing a nested query
-  tokensIndex = tokensIndex || 4;
-  if (thisObj.tokens[tokensIndex] !== 'query:')
+function parseObject(objectName, objectToken, thisObj, tokensIndex, 
+    parsedFirstNestedObj) {
+  if (thisObj.tokens.indexOf(objectToken) === -1)
     return tokensIndex;
 
+  debug();
+  debug('objectName: ' + objectName);
   debug(thisObj.line);
+  debug();
 
   tokensIndex++;
-  parsingFirstNestedQuery = (typeof parsingFirstNestedQuery !== 'undefined') ? 
-    parsingFirstNestedQuery : false;
+  parsedFirstNestedObj = (typeof parsedFirstNestedObj !== 'undefined') ? 
+    parsedFirstNestedObj : false;
 
   var leftParenCount = 0, rightParenCount = 0;
   var parsingRegex = false, parsingSingleQuotedString = false, 
     parsingDoubleQuotedString = false;
-  var queryStartIndex = tokensIndex;
+  var objectStartIndex = tokensIndex;
   var token;
 
   // when the number of left and right parentheses are equal, we've parsed the
-  // query object
+  // object
   do {
     token = thisObj.tokens[tokensIndex];
 
     debug('token: ' + token);
-    debug('leftParenCount: ' + leftParenCount + ' rightParenCount: ' + 
-      rightParenCount);
 
     // rare edge case handling:
-    // in the query object, we need to know if we're tokenzing tokens that are
-    // part of a string or regex
-    // why?
-    // when we know we're tokenzing parts of a string or a regex, we can ignore
-    // the 'query:' token because we know it's not a key that indicates a
-    // a nested query that needs to be parsed
-    // see test cases for examples 
+    // we have to know if we're tokenzing tokens that are part of a string or
+    // regex since we need to be able to tell the difference between when the
+    // objectToken is either 1. part of a string or regex or 2. a key
+    // if it's the latter, then we can expect to parse an object after the key
     if (parsingRegex) {
       if (token.search('/') >= 0)
         parsingRegex = false;
@@ -156,38 +153,60 @@ function parseQuery(thisObj, parsingFirstNestedQuery, tokensIndex) {
     } else if (parsingDoubleQuotedString) {
       if (token.search('\"') >= 0) 
         parsingDoubleQuotedString = false;
-    } else if (tokenBeginsExpression('/', token)) {
+    } else if (tokenBeginsWrap(token, '/')) {
       parsingRegex = true;
-    } else if (tokenBeginsExpression('\'', token)) {
+    } else if (tokenBeginsWrap(token, '\'')) {
       parsingSingleQuotedString = true;
-    } else if (tokenBeginsExpression('\"', token)) {
+    } else if (tokenBeginsWrap(token, '\"')) {
       parsingDoubleQuotedString = true;
     }
 
-    // handles the nested query object case, see test cases
-    else if (!parsingFirstNestedQuery && token === 'query:' &&
+    // handles the nested objectToken, see test cases
+    else if (!parsedFirstNestedObj && token === objectToken &&
         (leftParenCount - rightParenCount) === 1) {
 
-      return parseQuery(thisObj, true, tokensIndex);
+      return parseObject(objectName, objectToken, thisObj, tokensIndex, true);
+
+    }
 
     // parenthesis count
-    } else if (token === '{') {
+    else if (token === '{') {
       leftParenCount++;
     } else if (token === '}' || token === '},') {
       rightParenCount++;
-    } 
+    }
+
+    debug('leftParenCount: ' + leftParenCount + ' rightParenCount: ' + 
+    rightParenCount);
+    debug('parsingRegex: ' + parsingRegex);
+    debug('parsingSingleQuotedString: ' + parsingSingleQuotedString);
+    debug('parsingDoubleQuotedString: ' + parsingDoubleQuotedString);
+    debug(tokenBeginsWrap('/', token));
+    debug();
 
     tokensIndex++;
   } while (leftParenCount !== rightParenCount);
 
-  thisObj.query = thisObj.tokens.slice(queryStartIndex, tokensIndex).join(' ');
+  debug('Done tokenizing');
+
+  thisObj[objectName] = thisObj.tokens.slice(objectStartIndex, tokensIndex).
+    join(' ');
+  if (thisObj[objectName].slice(-2) === '},') {
+    thisObj[objectName] = thisObj[objectName].
+      slice(0, thisObj[objectName].length - 1);
+  }
+
+  debug(objectName);
+  debug(thisObj[objectName]);
 
   return tokensIndex;
 }
 
-function tokenBeginsExpression(exprSymbol, token) {
-  return token === exprSymbol || 
-    (token[0] === exprSymbol && token[token.length - 1] !== exprSymbol);
+function tokenBeginsWrap(token, wrapSymbol) {
+  return token === wrapSymbol || 
+      (token[0] === wrapSymbol && 
+      token.slice(-1) !== wrapSymbol && 
+      token.slice(-2) !== wrapSymbol + ',');
 }
 
 var timestampLengths = {
