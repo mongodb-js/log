@@ -124,7 +124,7 @@ describe('parse', function() {
       '{ field1: /regex/ }',
       '{ field1: /regex { query: regex/ }',
       '{ field: /wefwef " query: acme.*corp/i }',
-      '{ field1: / { query: } /, query: { query: \' / val3 / aaa\' } }',
+      '{ field1: / { query: } /, query: { query: \' / val3 / aaa\' }, x: 1 }',
       '{ field1: \'blah \" query: \" query: blah\' }'
     ],
     expectedQueries = [
@@ -151,6 +151,36 @@ describe('parse', function() {
       res = log.parse(line)[0];
 
       assert.equal(res.query, expectedQueries[i]);
+    }
+  });
+
+  // sort shape field
+  it('should parse the query and sort shape field', function() {
+    var queries = [
+      '{ orderby: { x123: 1.0 }, field1: / { orderby: } /, query: { query: \'' + 
+        ' / val3 / aaa\' } }',
+      '{ field1: / { orderby: } /, query: { orderby: \' / val3 / aaa\' }, ' +
+        'orderby: { x123: -1.0 } }',
+      '{ field1: / { orderby: } /, query: { orderby: \' / orderby / aaa\' }, ' +
+        'test: \'wee\', orderby: { x123: -1.0 } }'
+    ],
+    expectedSortShapes = [
+      '{ x123: 1.0 }',
+      '{ x123: -1.0 }',
+      '{ x123: -1.0 }'
+    ]
+
+    var line, res;
+
+    for (var i = 0; i < queries.length; i++) {
+      line = '2014-06-02T14:27:48.300-0400 [TTLMonitor] query ' + 
+        'admin.system.indexes query: ' + queries[i] + ' planSummary: EOF ' + 
+        'ntoreturn:9 ntoskip:9 nscanned:99 nscannedObjects:0 keyUpdates:9001 ' + 
+        'numYields:9999 locks(micros) w:1111 R:568 nreturned:0 reslen:20 ' + 
+        'nmoved:11 ndeleted:100 nupdated:1000 0ms';
+      res = log.parse(line)[0];
+
+      assert.equal(res.sort_shape, expectedSortShapes[i]);
     }
   });
 });
