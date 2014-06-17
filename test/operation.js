@@ -155,7 +155,7 @@ describe('parse', function() {
   });
 
   // sort shape field
-  it('should parse the query and sort shape field', function() {
+  it('should parse the sort shape field', function() {
     var queries = [
       '{ orderby: { x123: 1.0 }, field1: / { orderby: } /, query: { query: \'' + 
         ' / val3 / aaa\' } }',
