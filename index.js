@@ -62,6 +62,7 @@ function Entry(data, opts){
     this.operation = this.tokens[2];
 
     parseNamespaceFields(this);
+    // opTypeIndex + 2 is where the query object should start
     parseObject('sort_shape', 'orderby:', this, opTypeIndex + 2, false);
 
     var tokensIndex = parseObject('query', 'query:', this, opTypeIndex + 2, 
