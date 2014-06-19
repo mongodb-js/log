@@ -53,15 +53,20 @@ function Entry(data, opts){
     this.conn = data.thread;
 
   // operation format
-  if (operationTypes.contains(this.tokens[2])) {
+  // the operation type comes after the thread
+  var opTypeIndex = this.tokens.indexOf('[' + this.thread + ']') + 1;
+
+  if (operationTypes.contains(this.tokens[opTypeIndex])) {
     var lastToken = this.tokens.slice(-1)[0];
     this.duration = lastToken.substring(0, lastToken.length - 2);
     this.operation = this.tokens[2];
 
     parseNamespaceFields(this);
-    parseObject('sort_shape', 'orderby:', this, 4, false);
+    // opTypeIndex + 2 is where the query object should start
+    parseObject('sort_shape', 'orderby:', this, opTypeIndex + 2, false);
 
-    var tokensIndex = parseObject('query', 'query:', this, 4, false);
+    var tokensIndex = parseObject('query', 'query:', this, opTypeIndex + 2, 
+      false);
     var token;
 
     for (; tokensIndex < this.tokens.length; tokensIndex++) {
