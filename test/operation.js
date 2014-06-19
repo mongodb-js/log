@@ -115,6 +115,7 @@ describe('parse', function() {
   // query field
   it('should parse the query field or nested query field', function() {
     var queries = [
+      '{ query: {}, orderby: { age: -1.0 } }',
       '{ field1: { field2: { field3: \'val3\' }, field4: \'val4\' }, ' +
         'field5: \'val5\' }',
       '{ field1: { field2: { query: \'val3\' }, field4: \'val4\' }, ' +
@@ -128,6 +129,7 @@ describe('parse', function() {
       '{ field1: \'blah \" query: \" query: blah\' }'
     ],
     expectedQueries = [
+      '{}',
       '{ field1: { field2: { field3: \'val3\' }, field4: \'val4\' }, ' +
         'field5: \'val5\' }',
       '{ field1: { field2: { query: \'val3\' }, field4: \'val4\' }, ' +
@@ -143,7 +145,7 @@ describe('parse', function() {
     var line, res;
 
     for (var i = 0; i < queries.length; i++) {
-      line = '2014-06-02T14:27:48.300-0400 [TTLMonitor] query ' + 
+      line = 'Thu Jun 12 14:41:43.926 [TTLMonitor] query ' + 
         'admin.system.indexes query: ' + queries[i] + ' planSummary: EOF ' + 
         'ntoreturn:9 ntoskip:9 nscanned:99 nscannedObjects:0 keyUpdates:9001 ' + 
         'numYields:9999 locks(micros) w:1111 R:568 nreturned:0 reslen:20 ' + 
