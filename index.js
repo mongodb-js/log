@@ -2,15 +2,6 @@ var debug     = require('debug')('index'),
     regret    = require('./patterns'),
     Set       = require('set');
 
-var operationTypes = new Set([ 
-  'command', 
-  'delete', 
-  'getmore', 
-  'query', 
-  'remove', 
-  'update' 
-]);
-
 function errorMessage(msg){
   if(msg.indexOf('mongod instance already running?') > -1){
     return new Error('already running');
@@ -26,6 +17,15 @@ function getEvent(msg){
   }
   return null;
 }
+
+var operationTypes = new Set([
+  'command', 
+  'delete', 
+  'getmore', 
+  'query', 
+  'remove', 
+  'update' 
+]);
 
 function Entry(data, opts){
   opts = opts || {};
@@ -67,6 +67,8 @@ function Entry(data, opts){
 
     var tokensIndex = parseObject('query', 'query:', this, opTypeIndex + 2, 
       false);
+    parseQueryShape(this);
+
     var token;
 
     for (; tokensIndex < this.tokens.length; tokensIndex++) {
@@ -74,21 +76,6 @@ function Entry(data, opts){
       parseOperationStats(this, token);
     }
   }
-}
-
-var timestampLengths = {
-  '19': 'ctime-pre2.4',
-  '23': 'ctime',
-  '24': 'iso8601-utc',
-  '28': 'iso8601-local'
-};
-
-function parseTimestampFields(thisObj, timestamp) {
-  thisObj.timestamp = timestamp || new Date();
-  var tsLength = thisObj.timestamp.length;
-
-  if (timestampLengths[tsLength] !== undefined)
-    thisObj.timestamp_format = timestampLengths[tsLength];
 }
 
 function parseNamespaceFields(thisObj) {
@@ -132,9 +119,12 @@ function parseObject(objectName, objectToken, thisObj, tokensIndex,
     parsedFirstNestedObj : false;
 
   var leftParenCount = 0, rightParenCount = 0;
-  var parsingRegex = false, parsingSingleQuotedString = false, 
-    parsingDoubleQuotedString = false;
+  var parsingArray = false, 
+      parsingRegex = false, 
+      parsingSingleQuotedString = false, 
+      parsingDoubleQuotedString = false;
   var objectStartIndex = tokensIndex;
+  var JSONtokens = thisObj.tokens.slice(0);
   var token;
 
   // when the number of left and right parentheses are equal, we've parsed the
@@ -142,14 +132,19 @@ function parseObject(objectName, objectToken, thisObj, tokensIndex,
   do {
     token = thisObj.tokens[tokensIndex];
 
+    if (token === undefined) return tokensIndex;
+
     debug('token: ' + token);
 
     // rare edge case handling:
     // we have to know if we're tokenzing tokens that are part of a string or
     // regex since we need to be able to tell the difference between when the
-    // objectToken is either 1. part of a string or regex or 2. a key
+    // objectToken is either 1. part of a array, regex or string or 2. a key
     // if it's the latter, then we can expect to parse an object after the key
-    if (parsingRegex) {
+    if (parsingArray) {
+      if (token.search(']') >= 0)
+        parsingArray = false;
+    } else if (parsingRegex) {
       if (token.search('/') >= 0)
         parsingRegex = false;
     } else if (parsingSingleQuotedString) {
@@ -164,7 +159,9 @@ function parseObject(objectName, objectToken, thisObj, tokensIndex,
       parsingSingleQuotedString = true;
     } else if (tokenBeginsWrap(token, '\"')) {
       parsingDoubleQuotedString = true;
-    }
+    } else if (tokenBeginsWrap(token, '[')) {
+      parsingArray = true;
+    } 
 
     // handles the nested objectToken, see test cases
     else if (!parsedFirstNestedObj && token === objectToken &&
@@ -179,6 +176,9 @@ function parseObject(objectName, objectToken, thisObj, tokensIndex,
       leftParenCount++;
     } else if (token === '}' || token === '},') {
       rightParenCount++;
+    } else if (objectToken === 'query:' && token.length > 1 && 
+        token.slice(-1) === ':') {
+      JSONtokens[tokensIndex] = '\"' + token.slice(0, -1) + '\":';
     }
 
     debug('leftParenCount: ' + leftParenCount + ' rightParenCount: ' + 
@@ -201,6 +201,11 @@ function parseObject(objectName, objectToken, thisObj, tokensIndex,
       slice(0, thisObj[objectName].length - 1);
   }
 
+  if (objectToken === 'query:') {
+    thisObj.queryShape = JSONtokens.slice(objectStartIndex, tokensIndex).
+      join(' ');
+  }
+
   debug(objectName);
   debug(thisObj[objectName]);
 
@@ -212,6 +217,65 @@ function tokenBeginsWrap(token, wrapSymbol) {
       (token[0] === wrapSymbol && 
       token.slice(-1) !== wrapSymbol && 
       token.slice(-2) !== wrapSymbol + ',');
+}
+
+function parseQueryShape(thisObj) {
+  if (thisObj.query === undefined) 
+    return;
+
+  var queryObject = eval('(' + thisObj.query + ')'),
+      queryShape = parseQueryShapeObject(queryObject);
+
+  queryShape = JSON.stringify(queryShape, null, ' ');
+  queryShape = queryShape.replace(/(\r\n|\n|\r)/gm, ' '); // remove line breaks
+  queryShape = queryShape.replace(/\s+/g,' '); // remove extra spaces
+
+  thisObj.queryShape = queryShape;
+}
+
+var queryOpertors = new Set([
+  '$exists',
+  '$gt', 
+  '$gte', 
+  '$in', 
+  '$lt', 
+  '$lte',
+  '$nin',
+  '$regex'
+]);
+
+function parseQueryShapeObject(obj) {
+  var value;
+
+  for (var key in obj) {
+    value = obj[key];
+
+    if (queryOpertors.contains(key))
+      obj[key] = 1;
+    else if (Array.isArray(value))
+      parseQueryShapeArray(value);
+    else if (typeof(value) === 'object')
+      parseQueryShapeObject(value);
+    else
+      obj[key] = 1;
+  }
+
+  return obj;
+}
+
+function parseQueryShapeArray(ary) {
+  var ele;
+
+  for (var i = 0; i < ary.length; i++) {
+    ele = ary[i];
+
+    if (Array.isArray(ele))
+      parseQueryShapeArray(ele);
+    else if (typeof(ele) === 'object')
+      parseQueryShapeObject(ele);
+  }
+
+  return ary.sort();
 }
 
 var timestampLengths = {
@@ -234,6 +298,7 @@ module.exports.parse = function(lines, opts){
   if(!Array.isArray(lines)){
     lines = [lines];
   }
+
   return lines.filter(function(line){
     return line && line.length > 0;
   }).map(function(line){
