@@ -57,9 +57,10 @@ function Entry(data, opts){
   var opTypeIndex = this.tokens.indexOf('[' + this.thread + ']') + 1;
 
   if (operationTypes.contains(this.tokens[opTypeIndex])) {
+    this.operation = this.tokens[opTypeIndex];
+
     var lastToken = this.tokens.slice(-1)[0];
     this.duration = parseInt(lastToken.substring(0, lastToken.length - 2));
-    this.operation = this.tokens[2];
 
     parseNamespaceFields(this);
     // opTypeIndex + 2 is where the query object should start
@@ -79,7 +80,7 @@ function Entry(data, opts){
 }
 
 function parseNamespaceFields(thisObj) {
-  thisObj.namespace = thisObj.tokens[3];
+  thisObj.namespace = thisObj.tokens[thisObj.timestamp.split(' ').length + 2];
 
   var namespaceTokens = thisObj.namespace.split('.');
   thisObj.database = namespaceTokens[0];
@@ -286,6 +287,7 @@ var timestampLengths = {
 
 function parseTimestampFields(thisObj, timestamp) {
   thisObj.timestamp = timestamp || new Date();
+
   var tsLength = thisObj.timestamp.length;
 
   if (timestampLengths[tsLength] !== undefined)
