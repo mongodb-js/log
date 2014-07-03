@@ -28,10 +28,8 @@ var operationTypes = new Set([
 ]);
 
 function Entry(data, opts){
-  opts = opts || {};
   data = data || {};
-
-  opts.wrap = opts.wrap || 80;
+  opts = opts || {};
 
   // general fields
   parseTimestampFields(this, data.timestamp);
@@ -39,6 +37,7 @@ function Entry(data, opts){
   this.event = getEvent(data.message);
   this.line = data.line;
   this.message = data.message || '';
+
   this.tokens = data.line.split(' ');
   this.thread = data.thread;
 

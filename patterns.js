@@ -32,11 +32,4 @@ regret.add(
   ['line', 'timestamp', 'thread', 'message']
 );
 
-regret.add(
-  'mongodb.logshutdown', 
-  /(\w+)\: (.*)/,
-  'dbexit: really exiting now', 
-  ['name', 'message']
-);
-
 module.exports = regret;

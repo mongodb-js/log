@@ -112,6 +112,17 @@ describe('parse', function(){
     }
   });
 
+  it('should parse lines that are not of log format', function() {
+    var lines = [
+      'killcursors: found 0 of 1',
+      'dbexit: really exiting now'
+    ],
+    res = log.parse(lines);
+
+    for (var i = 0; i < lines.length; i++)
+      assert.equal(res[i].line, lines[i]);
+  });
+
   // Wed Jan  1 12:45:05.102 [conn3] build index twitter.tweets  \
   // { lang: 1.0, protected: 1.0 }
   // Wed Jan  1 12:45:05.363 [conn3] build index done.  scanned 51428 total  \
