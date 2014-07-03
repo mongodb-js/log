@@ -214,21 +214,6 @@ function tokenBeginsWrap(token, wrapSymbol) {
       token.slice(-2) !== wrapSymbol + ',');
 }
 
-var timestampLengths = {
-  '19': 'ctime-pre2.4',
-  '23': 'ctime',
-  '24': 'iso8601-utc',
-  '28': 'iso8601-local'
-};
-
-function parseTimestampFields(thisObj, timestamp) {
-  thisObj.timestamp = timestamp || new Date();
-  var tsLength = thisObj.timestamp.length;
-
-  if (timestampLengths[tsLength] !== undefined)
-    thisObj.timestamp_format = timestampLengths[tsLength];
-}
-
 module.exports.parse = function(lines, opts){
   opts = opts || {};
   if(!Array.isArray(lines)){
