@@ -58,7 +58,7 @@ function Entry(data, opts){
 
   if (operationTypes.contains(this.tokens[opTypeIndex])) {
     var lastToken = this.tokens.slice(-1)[0];
-    this.duration = lastToken.substring(0, lastToken.length - 2);
+    this.duration = parseInt(lastToken.substring(0, lastToken.length - 2));
     this.operation = this.tokens[2];
 
     parseNamespaceFields(this);
@@ -206,8 +206,7 @@ function parseObject(objectName, objectToken, thisObj, tokensIndex,
       join(' ');
   }
 
-  debug(objectName);
-  debug(thisObj[objectName]);
+  debug(objectName + ' = ' + thisObj[objectName]);
 
   return tokensIndex;
 }
@@ -233,7 +232,7 @@ function parseQueryShape(thisObj) {
   thisObj.queryShape = queryShape;
 }
 
-var queryOpertors = new Set([
+var queryOperators = new Set([
   '$exists',
   '$gt', 
   '$gte', 
@@ -250,12 +249,12 @@ function parseQueryShapeObject(obj) {
   for (var key in obj) {
     value = obj[key];
 
-    if (queryOpertors.contains(key))
-      obj[key] = 1;
+    if (queryOperators.contains(key))
+      return 1;
     else if (Array.isArray(value))
-      parseQueryShapeArray(value);
-    else if (typeof(value) === 'object')
-      parseQueryShapeObject(value);
+      obj[key] = parseQueryShapeArray(value);
+    else if (typeof(value) === 'object' && !(value instanceof RegExp))
+      obj[key] = parseQueryShapeObject(value);
     else
       obj[key] = 1;
   }

@@ -117,6 +117,7 @@ describe('parse', function() {
   it('should parse the query field or nested query field', function() {
     var queries = [
       '{}',
+      '{ x: 20.0 }',
       '{ field1: 1 }',
       '{ field1: [ 1 ] }',
       '{ query: {}, orderby: { age: -1.0 } }',
@@ -135,6 +136,7 @@ describe('parse', function() {
     ],
     expectedQueries = [
       '{}',
+      '{ x: 20.0 }',
       '{ field1: 1 }',
       '{ field1: [ 1 ] }',
       '{}',
@@ -168,14 +170,21 @@ describe('parse', function() {
   // query shape field
   it('should parse the query shape', function() {
     var queries = [
+      '{ x: 20.0 }',
       '{ field: { $exists: true } }',
-      '{ f1: true, f2: 55, f3: \'str\', $regex: / regex $gt / }',
-      '{ f1: [ 3, 2, 1 ] }'
+      '{ f11: true, f22: 55, f33: \'str\', $f44: / regex $gt / }',
+      '{ f1: [ 3, 2, 1 ] }',
+      '{ orderby: { x123: 1.0 }, field1: / { orderby: } /, query: { query: \'' + 
+        ' / val3 / aaa\' } }',
+      '{ expireAfterSeconds: { $exists: 1 } }'
     ],
     expectedQueryShapes = [
-      '{ \"field\": { \"$exists\": 1 } }',
-      '{ \"f1\": 1, \"f2\": 1, \"f3\": 1, \"$regex\": 1 }',
-      '{ \"f1\": [ 1, 2, 3 ] }'
+      '{ \"x\": 1 }',
+      '{ \"field\": 1 }',
+      '{ \"f11\": 1, \"f22\": 1, \"f33\": 1, \"$f44\": 1 }',
+      '{ \"f1\": [ 1, 2, 3 ] }',
+      '{ \"query\": 1 }',
+      '{ \"expireAfterSeconds\": 1 }'
     ];
 
     var line, res;
@@ -209,10 +218,9 @@ describe('parse', function() {
     ]
 
     var line, res;
-
     for (var i = 0; i < queries.length; i++) {
-      line = '2014-06-02T14:27:48.300-0400 [TTLMonitor] query ' + 
-        'admin.system.indexes query: ' + queries[i] + ' planSummary: EOF ' + 
+      line = '2014-07-01T21:36:48.207-0400 [conn596] query ' + 
+        'test.testData query: ' + queries[i] + ' planSummary: EOF ' + 
         'ntoreturn:9 ntoskip:9 nscanned:99 nscannedObjects:0 keyUpdates:9001 ' + 
         'numYields:9999 locks(micros) w:1111 R:568 nreturned:0 reslen:20 ' + 
         'nmoved:11 ndeleted:100 nupdated:1000 0ms';
