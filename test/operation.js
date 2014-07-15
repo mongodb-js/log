@@ -110,11 +110,16 @@ describe('parse', function() {
     for (var i = 0; i < lines.length; i++)
       for (key in expected[i])
         assert.equal(res[i][key], expected[i][key]);
+
   });
 
   // query field
   it('should parse the query field or nested query field', function() {
     var queries = [
+      '{}',
+      '{ x: 20.0 }',
+      '{ field1: 1 }',
+      '{ field1: [ 1 ] }',
       '{ query: {}, orderby: { age: -1.0 } }',
       '{ field1: { field2: { field3: \'val3\' }, field4: \'val4\' }, ' +
         'field5: \'val5\' }',
@@ -126,9 +131,14 @@ describe('parse', function() {
       '{ field1: /regex { query: regex/ }',
       '{ field: /wefwef " query: acme.*corp/i }',
       '{ field1: / { query: } /, query: { query: \' / val3 / aaa\' }, x: 1 }',
-      '{ field1: \'blah \" query: \" query: blah\' }'
+      '{ field1: \'blah \" query: \" query: blah\' }',
+      '{ field1: [ \'a query: a\' ] }'
     ],
     expectedQueries = [
+      '{}',
+      '{ x: 20.0 }',
+      '{ field1: 1 }',
+      '{ field1: [ 1 ] }',
       '{}',
       '{ field1: { field2: { field3: \'val3\' }, field4: \'val4\' }, ' +
         'field5: \'val5\' }',
@@ -139,7 +149,8 @@ describe('parse', function() {
       '{ field1: /regex { query: regex/ }',
       '{ field: /wefwef " query: acme.*corp/i }',
       '{ query: \' / val3 / aaa\' }',
-      '{ field1: \'blah \" query: \" query: blah\' }'
+      '{ field1: \'blah \" query: \" query: blah\' }',
+      '{ field1: [ \'a query: a\' ] }'
     ];
 
     var line, res;
@@ -153,6 +164,40 @@ describe('parse', function() {
       res = log.parse(line)[0];
 
       assert.equal(res.query, expectedQueries[i]);
+    }
+  });
+
+  // query shape field
+  it('should parse the query shape', function() {
+    var queries = [
+      '{ x: 20.0 }',
+      '{ field: { $exists: true } }',
+      '{ f11: true, f22: 55, f33: \'str\', $f44: / regex $gt / }',
+      '{ f1: [ 3, 2, 1 ] }',
+      '{ orderby: { x123: 1.0 }, field1: / { orderby: } /, query: { query: \'' + 
+        ' / val3 / aaa\' } }',
+      '{ expireAfterSeconds: { $exists: 1 } }'
+    ],
+    expectedQueryShapes = [
+      '{ \"x\": 1 }',
+      '{ \"field\": 1 }',
+      '{ \"f11\": 1, \"f22\": 1, \"f33\": 1, \"$f44\": 1 }',
+      '{ \"f1\": [ 1, 2, 3 ] }',
+      '{ \"query\": 1 }',
+      '{ \"expireAfterSeconds\": 1 }'
+    ];
+
+    var line, res;
+
+    for (var i = 0; i < queries.length; i++) {
+      line = 'Thu Jun 12 14:41:43.926 [TTLMonitor] query ' + 
+        'admin.system.indexes query: ' + queries[i] + ' planSummary: EOF ' + 
+        'ntoreturn:9 ntoskip:9 nscanned:99 nscannedObjects:0 keyUpdates:9001 ' + 
+        'numYields:9999 locks(micros) w:1111 R:568 nreturned:0 reslen:20 ' + 
+        'nmoved:11 ndeleted:100 nupdated:1000 0ms';
+      res = log.parse(line)[0];
+
+      assert.equal(res.queryShape, expectedQueryShapes[i]);
     }
   });
 
@@ -173,10 +218,9 @@ describe('parse', function() {
     ]
 
     var line, res;
-
     for (var i = 0; i < queries.length; i++) {
-      line = '2014-06-02T14:27:48.300-0400 [TTLMonitor] query ' + 
-        'admin.system.indexes query: ' + queries[i] + ' planSummary: EOF ' + 
+      line = '2014-07-01T21:36:48.207-0400 [conn596] query ' + 
+        'test.testData query: ' + queries[i] + ' planSummary: EOF ' + 
         'ntoreturn:9 ntoskip:9 nscanned:99 nscannedObjects:0 keyUpdates:9001 ' + 
         'numYields:9999 locks(micros) w:1111 R:568 nreturned:0 reslen:20 ' + 
         'nmoved:11 ndeleted:100 nupdated:1000 0ms';
