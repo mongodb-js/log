@@ -1,6 +1,6 @@
 {
   "name": "mongodb-log",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Turn flat mongodb log entires into nice structured objects.",
   "scripts": {
     "test": "mocha",
