@@ -3,18 +3,14 @@
   "version": "1.1.1",
   "description": "Turn flat mongodb log entires into nice structured objects.",
   "scripts": {
-    "test": "mocha",
-    "check": "jshint *.js && istanbul cover _mocha"
+    "test": "mocha"
   },
   "dependencies": {
-    "debug": "^0.7.4",
-    "regret": "^0.1.1",
-    "set": "^1.1.1"
+    "debug": "^1.0.4",
+    "regret": "^0.1.1"
   },
   "devDependencies": {
-    "mocha": "^1.17.1",
-    "jshint": "^2.5.1",
-    "istanbul": "^0.2.10"
+    "mocha": "^1.20.1"
   },
   "keywords": [
     "mongodb",
