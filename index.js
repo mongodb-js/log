@@ -136,10 +136,7 @@ function parseObject(objectName, objectToken, thisObj, tokensIndex,
   if (thisObj.tokens.indexOf(objectToken) === -1)
     return tokensIndex;
 
-  debug();
-  debug('objectName: ' + objectName);
-  debug(thisObj.line);
-  debug();
+  debug('parsing object `' + objectName + '`', thisObj.line);
 
   tokensIndex++;
   parsedFirstNestedObj = (typeof parsedFirstNestedObj !== 'undefined') ?
@@ -160,8 +157,6 @@ function parseObject(objectName, objectToken, thisObj, tokensIndex,
     token = thisObj.tokens[tokensIndex];
 
     if (token === undefined) return tokensIndex;
-
-    debug('token: ' + token);
 
     // rare edge case handling:
     // we have to know if we're tokenzing tokens that are part of a string or
@@ -208,18 +203,8 @@ function parseObject(objectName, objectToken, thisObj, tokensIndex,
       JSONtokens[tokensIndex] = '\"' + token.slice(0, -1) + '\":';
     }
 
-    debug('leftParenCount: ' + leftParenCount + ' rightParenCount: ' +
-    rightParenCount);
-    debug('parsingRegex: ' + parsingRegex);
-    debug('parsingSingleQuotedString: ' + parsingSingleQuotedString);
-    debug('parsingDoubleQuotedString: ' + parsingDoubleQuotedString);
-    debug(tokenBeginsWrap('/', token));
-    debug();
-
     tokensIndex++;
   } while (leftParenCount !== rightParenCount);
-
-  debug('Done tokenizing');
 
   thisObj[objectName] = thisObj.tokens.slice(objectStartIndex, tokensIndex).
     join(' ');
@@ -232,8 +217,6 @@ function parseObject(objectName, objectToken, thisObj, tokensIndex,
     thisObj.queryShape = JSONtokens.slice(objectStartIndex, tokensIndex).
       join(' ');
   }
-
-  debug(objectName + ' = ' + thisObj[objectName]);
 
   return tokensIndex;
 }
