@@ -79,33 +79,10 @@ function Entry(data, opts){
 
   if(!data.line || !data.thread) console.warn('suspicious entry', data);
 
-  // operation format
-  // the operation type comes after the thread
-  var opTypeIndex = this.tokens.indexOf('[' + this.thread + ']') + 1;
-
-  if(OPS.indexOf(this.tokens[opTypeIndex]) > -1){
-    var lastToken = this.tokens.slice(-1)[0];
-    this.duration = parseInt(lastToken.substring(0, lastToken.length - 2));
-    this.operation = this.tokens[2];
-
-    parseNamespaceFields(this);
-    // opTypeIndex + 2 is where the query object should start
-    parseObject('sort_shape', 'orderby:', this, opTypeIndex + 2, false);
-
-    var tokensIndex = parseObject('query', 'query:', this, opTypeIndex + 2,
-      false);
-    parseQueryShape(this);
-
-    var token;
-
-    for (; tokensIndex < this.tokens.length; tokensIndex++) {
-      token = this.tokens[tokensIndex];
-      parseOperationStats(this, token);
-    }
-  }
+  parseOperation(this);
 }
 
-function parseNamespaceFields(thisObj) {
+function parseNamespaceFields(thisObj){
   thisObj.namespace = thisObj.tokens[3];
 
   var namespaceTokens = thisObj.namespace.split('.');
@@ -117,7 +94,36 @@ function parseNamespaceFields(thisObj) {
     thisObj.index = lastToken.substring(1);
 }
 
-function parseOperationStats(thisObj, token) {
+function parseOperation(thisObj){
+    // the operation type comes after the thread
+  var opTypeIndex = thisObj.tokens.indexOf('[' + thisObj.thread + ']') + 1;
+
+  if(OPS.indexOf(thisObj.tokens[opTypeIndex]) > -1){
+    var lastToken = thisObj.tokens.slice(-1)[0];
+    thisObj.duration = parseInt(lastToken.substring(0, lastToken.length - 2));
+    thisObj.operation = thisObj.tokens[2];
+
+    parseNamespaceFields(thisObj);
+    // opTypeIndex + 2 is where the query object should start
+    parseObject('sortShape', 'orderby:', thisObj, opTypeIndex + 2, false);
+
+    var tokensIndex = parseObject('query', 'query:', thisObj, opTypeIndex + 2,
+      false);
+    parseQueryShape(thisObj);
+
+    if(thisObj.queryShape !== undefined)
+      thisObj.queryPattern = thisObj.namespace + ' ' + thisObj.queryShape;
+
+    var token;
+
+    for (; tokensIndex < thisObj.tokens.length; tokensIndex++) {
+      token = thisObj.tokens[tokensIndex];
+      parseOperationStats(thisObj, token);
+    }
+  }
+}
+
+function parseOperationStats(thisObj, token){
   var colonIndex = token.search(':');
   var key, intValue;
 
@@ -132,7 +138,7 @@ function parseOperationStats(thisObj, token) {
 }
 
 function parseObject(objectName, objectToken, thisObj, tokensIndex,
-    parsedFirstNestedObj) {
+    parsedFirstNestedObj){
   if (thisObj.tokens.indexOf(objectToken) === -1)
     return tokensIndex;
 
@@ -221,14 +227,14 @@ function parseObject(objectName, objectToken, thisObj, tokensIndex,
   return tokensIndex;
 }
 
-function tokenBeginsWrap(token, wrapSymbol) {
+function tokenBeginsWrap(token, wrapSymbol){
   return token === wrapSymbol ||
       (token[0] === wrapSymbol &&
       token.slice(-1) !== wrapSymbol &&
       token.slice(-2) !== wrapSymbol + ',');
 }
 
-function parseQueryShape(thisObj) {
+function parseQueryShape(thisObj){
   if (thisObj.query === undefined)
     return;
 
@@ -242,7 +248,7 @@ function parseQueryShape(thisObj) {
   thisObj.queryShape = queryShape;
 }
 
-function parseQueryShapeObject(obj) {
+function parseQueryShapeObject(obj){
   var value;
 
   for (var key in obj) {
@@ -261,7 +267,7 @@ function parseQueryShapeObject(obj) {
   return obj;
 }
 
-function parseQueryShapeArray(ary) {
+function parseQueryShapeArray(ary){
   var ele;
 
   for (var i = 0; i < ary.length; i++) {

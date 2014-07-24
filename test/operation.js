@@ -167,6 +167,20 @@ describe('parse', function() {
     }
   });
 
+  // query pattern field
+  it('should parse the query pattern', function() {
+    expectedQueryPattern = 'admin.system.indexes { \"x\": 1 }';
+
+    line = 'Thu Jun 12 14:41:43.926 [TTLMonitor] query ' + 
+      'admin.system.indexes query: { x: 20.0 } planSummary: EOF ' + 
+      'ntoreturn:9 ntoskip:9 nscanned:99 nscannedObjects:0 keyUpdates:9001 ' + 
+      'numYields:9999 locks(micros) w:1111 R:568 nreturned:0 reslen:20 ' + 
+      'nmoved:11 ndeleted:100 nupdated:1000 0ms';
+    
+    res = log.parse(line)[0];
+    assert.equal(res.queryPattern, expectedQueryPattern);
+  });
+
   // query shape field
   it('should parse the query shape', function() {
     var queries = [
@@ -226,7 +240,7 @@ describe('parse', function() {
         'nmoved:11 ndeleted:100 nupdated:1000 0ms';
       res = log.parse(line)[0];
 
-      assert.equal(res.sort_shape, expectedSortShapes[i]);
+      assert.equal(res.sortShape, expectedSortShapes[i]);
     }
   });
 });
