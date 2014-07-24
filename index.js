@@ -1,5 +1,6 @@
-var debug = require('debug')('mongodb-log'),
-  regret = require('./patterns');
+var JSONL   = require('json-literal')
+    debug   = require('debug')('mongodb-log'),
+    regret  = require('./patterns');
 
 
 var OPS = 'command delete getmore query remove update'.split(' ');
@@ -232,7 +233,7 @@ function parseQueryShape(thisObj) {
   if (thisObj.query === undefined)
     return;
 
-  var queryObject = eval('(' + thisObj.query + ')'),
+  var queryObject = JSONL.parse(thisObj.query),
       queryShape = parseQueryShapeObject(queryObject);
 
   queryShape = JSON.stringify(queryShape, null, ' ');
