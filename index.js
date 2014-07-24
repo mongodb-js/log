@@ -83,7 +83,7 @@ function Entry(data, opts){
 }
 
 function parseNamespaceFields(thisObj){
-  thisObj.namespace = thisObj.tokens[3];
+  thisObj.namespace = thisObj.tokens[thisObj.timestamp.split(' ').length + 2];
 
   var namespaceTokens = thisObj.namespace.split('.');
   thisObj.database = namespaceTokens[0];
