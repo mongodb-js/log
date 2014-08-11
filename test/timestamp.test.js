@@ -1,5 +1,5 @@
 var assert = require('assert'),
-    log    = require('./..');
+  log = require('./..');
 
 describe('parse', function() {
   it('should parse the timestamp and the timestamp format', function() {

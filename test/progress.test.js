@@ -1,4 +1,4 @@
-describe('Progress', function(){
+describe('Progress', function() {
   // Wed Jan  1 12:45:05.102 [conn3] build index twitter.tweets  \
   // { lang: 1.0, protected: 1.0 }
   // Wed Jan  1 12:45:05.363 [conn3] build index done.  scanned 51428 total  \
