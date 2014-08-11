@@ -240,17 +240,22 @@ function tokenBeginsWrap(token, wrapSymbol){
 }
 
 function parseQueryShape(thisObj){
-  if (thisObj.query === undefined)
+  if (thisObj.query === undefined) return;
+
+  var queryObject;
+  try{
+    queryObject = JSONL.parse(thisObj.query);
+  }
+  catch(e){
+    debug('Could not parse literal json %s. error: %s', thisObj.query, e);
     return;
+  }
 
-  var queryObject = JSONL.parse(thisObj.query),
-      queryShape = parseQueryShapeObject(queryObject);
-
-  queryShape = JSON.stringify(queryShape, null, ' ');
-  queryShape = queryShape.replace(/(\r\n|\n|\r)/gm, ' '); // remove line breaks
-  queryShape = queryShape.replace(/\s+/g,' '); // remove extra spaces
-
-  thisObj.queryShape = queryShape;
+  thisObj.queryShape = JSON.stringify(parseQueryShapeObject(queryObject), null, ' ')
+    // remove line breaks
+    .replace(/(\r\n|\n|\r)/gm, ' ')
+    // remove extra spaces
+    .replace(/\s+/g,' ');
 }
 
 function parseQueryShapeObject(obj){
