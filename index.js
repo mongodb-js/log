@@ -78,7 +78,11 @@ function Entry(data, opts){
     this.conn = data.thread;
   }
 
-  if(!data.line || !data.thread) console.warn('suspicious entry', data);
+  if(!data.line || !data.thread){
+    // Message from shell that is not a log entry
+    console.error(data.line);
+    return;
+  }
 
   parseOperation(this);
 }
