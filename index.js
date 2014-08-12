@@ -170,10 +170,9 @@ function parseQueryShape(thisObj) {
     debug('Could not parse literal json %s. error: %s', thisObj.query, e);
     return;
   }
-  thisObj.queryShape = JSON.stringify(
-    parseQueryShapeObject(queryObject), null, ' '
-  ).replace(/(\r\n|\n|\r)/gm, ' ') // remove newlines
-  .replace(/\s+/g, ' ');           // combine whitespace
+  thisObj.queryShape = JSONFlatStringify(
+    parseQueryShapeObject(queryObject)
+  );
 
   setQueryPattern(thisObj);
 }
