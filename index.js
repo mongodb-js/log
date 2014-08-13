@@ -137,17 +137,17 @@ function parseQuery(thisObj, currentTokenIndex) {
   var object = JSONL.parse(objectStr);
 
   if (object['$comment'])
-    thisObj.comment = JSONFlatStringify(object['$comment']);
+    thisObj.comment = object['$comment'];
 
   if (object.orderby)
-    thisObj.sortShape = JSONFlatStringify(object.orderby);
+    thisObj.sortShape = object.orderby;
 
   if (object.query)
-    thisObj.query = JSONFlatStringify(object.query)
+    thisObj.query = object.query;
   else if (object['$query'])
-    thisObj.query = JSONFlatStringify(object['$query'])
+    thisObj.query = object['$query'];
   else
-    thisObj.query = objectStr;
+    thisObj.query = object;
 
   parseQueryShape(thisObj);
 
@@ -161,35 +161,25 @@ function JSONFlatStringify(obj) {
   return JSON.stringify(obj, null, ' ').split(/\s+/).join(' ');
 }
 function parseQueryShape(thisObj) {
-  if (thisObj.query === undefined)
-    return;
-  var queryObject;
-  try {
-    queryObject = JSONL.parse(thisObj.query);
-  } catch (e) {
-    debug('Could not parse literal json %s. error: %s', thisObj.query, e);
-    return;
-  }
-  thisObj.queryShape = JSONFlatStringify(
-    parseQueryShapeObject(queryObject)
-  );
-
+  thisObj.queryShape = parseQueryShapeObject(thisObj.query);
   setQueryPattern(thisObj);
 }
 function parseQueryShapeObject(obj) {
+  objCopy = JSON.parse(JSON.stringify(obj));
+
   var value;
-  for (var key in obj) {
-    value = obj[key];
+  for (var key in objCopy) {
+    value = objCopy[key];
     if (QUERY_OPS.indexOf(key) > -1)
       return 1;
     if (Array.isArray(value))
-      obj[key] = parseQueryShapeArray(value);
-    else if (typeof value === 'object' && !(value instanceof RegExp))
-      obj[key] = parseQueryShapeObject(value);
+      objCopy[key] = parseQueryShapeArray(value);
+    else if (typeof value === 'objCopyect' && !(value instanceof RegExp))
+      objCopy[key] = parseQueryShapeObjCopyect(value);
     else
-      obj[key] = 1;
+      objCopy[key] = 1;
   }
-  return obj;
+  return objCopy;
 }
 function parseQueryShapeArray(ary) {
   var ele;
@@ -203,7 +193,8 @@ function parseQueryShapeArray(ary) {
   return ary.sort();
 }
 function setQueryPattern(thisObj) {
-  thisObj.queryPattern = thisObj.namespace + ' ' + thisObj.queryShape;
+  thisObj.queryPattern = thisObj.namespace + ' ' + 
+    JSONFlatStringify(thisObj.queryShape);
 }
 module.exports.parse = function (lines, opts) {
   opts = opts || {};

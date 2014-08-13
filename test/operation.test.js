@@ -12,12 +12,12 @@ describe('Operations', function() {
       'r:93 nreturned:1 reslen:89 0ms'
     ];
     expectedComments = [
-      '{ \"mongoscope_feature\": "get instance collections" }'
+      {"mongoscope_feature":"get instance collections"}
     ];
     res = log.parse(lines);
 
     for (var i = 0; i < lines.length; i++)
-      assert.equal(res[i].comment, expectedComments[i]);
+      assert.deepEqual(res[i].comment, expectedComments[i]);
   }),
 
   // namespace fields
@@ -154,23 +154,23 @@ describe('Operations', function() {
       's" } }'
     ],
     expectedQueries = [
-      '{}',
-      '{ x: 20.0 }',
-      '{ field1: 1 }',
-      '{ field1: [ 1 ] }',
-      '{}',
-      '{ field1: { field2: { field3: \'val3\' }, field4: \'val4\' }, ' +
-      'field5: \'val5\' }',
-      '{ field1: { field2: { query: \'val3\' }, field4: \'val4\' }, ' +
-      'field5: \'val5\' }',
-      '{ \"query\": { \"query\": \"val3\" }, \"field4\": \"val4\" }',
-      '{ field1: /regex/ }',
-      '{ field1: /regex/, field2: { query: /regex/ } }',
-      '{ field: /wefwef " query: acme.*corp/i }',
-      '{ \"query\": \" / val3 / aaa\" }',
-      '{ field1: \'blah \" query: \" query: blah\' }',
-      '{ field1: [ \'a query: a\' ] }',
-      '{}'
+      {},
+      { x: 20.0 },
+      { field1: 1 },
+      { field1: [ 1 ] },
+      {},
+      { field1: { field2: { field3: 'val3' }, field4: 'val4' }, 
+        field5: 'val5' },
+      { field1: { field2: { query: 'val3' }, field4: 'val4' },
+        field5: 'val5' },
+      { "query": { "query": "val3" }, "field4": "val4" },
+      { field1: /regex/ },
+      { field1: /regex/, field2: { query: /regex/ } },
+      { field: /wefwef " query: acme.*corp/i },
+      { "query": " / val3 / aaa" },
+      { field1: 'blah " query: " query: blah' },
+      { field1: [ 'a query: a' ] },
+      {}
     ];
 
     var line, res;
@@ -183,7 +183,7 @@ describe('Operations', function() {
       'nmoved:11 ndeleted:100 nupdated:1000 0ms';
       res = log.parse(line)[0];
 
-      assert.equal(res.query, expectedQueries[i]);
+      assert.deepEqual(res.query, expectedQueries[i]);
     }
   });
 
@@ -213,12 +213,12 @@ describe('Operations', function() {
       '{ expireAfterSeconds: { $exists: 1 } }'
     ],
     expectedQueryShapes = [
-      '{ \"x\": 1 }',
-      '{ \"field\": 1 }',
-      '{ \"f11\": 1, \"f22\": 1, \"f33\": 1, \"$f44\": 1 }',
-      '{ \"f1\": [ 1, 2, 3 ] }',
-      '{ \"query\": 1 }',
-      '{ \"expireAfterSeconds\": 1 }'
+      { "x": 1 },
+      { "field": 1 },
+      { "f11": 1, "f22": 1, "f33": 1, "$f44": 1 },
+      { "f1": [ 1, 2, 3 ] },
+      { "query": 1 },
+      { "expireAfterSeconds": 1 }
     ];
 
     var line, res;
@@ -231,7 +231,7 @@ describe('Operations', function() {
       'nmoved:11 ndeleted:100 nupdated:1000 0ms';
       res = log.parse(line)[0];
 
-      assert.equal(res.queryShape, expectedQueryShapes[i]);
+      assert.deepEqual(res.queryShape, expectedQueryShapes[i]);
     }
   });
 
@@ -246,9 +246,9 @@ describe('Operations', function() {
       'test: \'wee\', orderby: { x123: -1.0 } }'
     ],
     expectedSortShapes = [
-      '{ \"x123\": 1 }',
-      '{ \"x123\": -1 }',
-      '{ \"x123\": -1 }'
+      { "x123": 1 },
+      { "x123": -1 },
+      { "x123": -1 }
     ]
 
     var line, res;
@@ -260,7 +260,7 @@ describe('Operations', function() {
       'nmoved:11 ndeleted:100 nupdated:1000 0ms';
       res = log.parse(line)[0];
 
-      assert.equal(res.sortShape, expectedSortShapes[i]);
+      assert.deepEqual(res.sortShape, expectedSortShapes[i]);
     }
   });
 });
