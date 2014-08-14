@@ -1,6 +1,9 @@
-var JSONL = require('json-literal'), debug = require('debug')('mongodb-log'), regret = require('./patterns');
-var OPS = 'command delete getmore query remove update'.split(' ');
-var QUERY_OPS = '$exists $gt $gte $in $lt $lte $nin $regex'.split(' ');
+var JSONL   = require('json-literal'),
+    debug   = require('debug')('mongodb-log'),
+    regret  = require('./patterns');
+var OPS       = 'command delete getmore query remove update'.split(' '),
+    QUERY_OPS = '$exists $gt $gte $in $lt $lte $nin $regex'.split(' ');
+
 function getTimestampFormat(timestamp) {
   var format, l = timestamp.length;
   switch (l) {
@@ -77,25 +80,25 @@ function parseNamespaceFields(thisObj) {
 function parseOperation(thisObj) {
   // the operation type comes after the thread
   var opTypeIndex = thisObj.tokens.indexOf('[' + thisObj.thread + ']') + 1;
+
   if (OPS.indexOf(thisObj.tokens[opTypeIndex]) > -1) {
     var lastToken = thisObj.tokens.slice(-1)[0];
     thisObj.duration = parseInt(lastToken.substring(0, lastToken.length - 2));
     thisObj.operation = thisObj.tokens[2];
+
     parseNamespaceFields(thisObj);
-    // opTypeIndex + 2 is where the query object should start
-    parseObject('sortShape', 'orderby:', thisObj, opTypeIndex + 2, false);
-    var tokensIndex = parseObject('query', 'query:', thisObj, opTypeIndex + 2, false);
-    parseQueryShape(thisObj);
-    if (thisObj.queryShape !== undefined)
-      thisObj.queryPattern = thisObj.namespace + ' ' + thisObj.queryShape;
-    var token;
-    for (; tokensIndex < thisObj.tokens.length; tokensIndex++) {
-      token = thisObj.tokens[tokensIndex];
-      parseOperationStats(thisObj, token);
-    }
+    var currentTokenIndex = parseQuery(thisObj, opTypeIndex + 2);
+    parseOperationStats(thisObj, currentTokenIndex);
   }
 }
-function parseOperationStats(thisObj, token) {
+function parseOperationStats(thisObj, currentTokenIndex) {
+  var token;
+  for (; currentTokenIndex < thisObj.tokens.length; currentTokenIndex++) {
+    token = thisObj.tokens[currentTokenIndex];
+    parseOperationStat(thisObj, token);
+  }
+}
+function parseOperationStat(thisObj, token) {
   var colonIndex = token.search(':');
   var key, intValue;
   // parsing operation stat fields
@@ -106,99 +109,77 @@ function parseOperationStats(thisObj, token) {
       thisObj[key] = intValue;
   }
 }
-function parseObject(objectName, objectToken, thisObj, tokensIndex, parsedFirstNestedObj) {
-  if (thisObj.tokens.indexOf(objectToken) === -1)
-    return tokensIndex;
-  debug('parsing object `' + objectName + '`', thisObj.line);
-  tokensIndex++;
-  parsedFirstNestedObj = typeof parsedFirstNestedObj !== 'undefined' ? parsedFirstNestedObj : false;
+function parseQuery(thisObj, currentTokenIndex) {
+  if (thisObj.tokens.indexOf('query:') === -1)
+    return currentTokenIndex;
+  currentTokenIndex++;
   var leftParenCount = 0, rightParenCount = 0;
-  var parsingArray = false, parsingRegex = false, parsingSingleQuotedString = false, parsingDoubleQuotedString = false;
-  var objectStartIndex = tokensIndex;
-  var JSONtokens = thisObj.tokens.slice(0);
+  var queryStartIndex = currentTokenIndex;
   var token;
+
   // when the number of left and right parentheses are equal, we've parsed the
-  // object
+  // query object string
   do {
-    token = thisObj.tokens[tokensIndex];
+    token = thisObj.tokens[currentTokenIndex];
     if (token === undefined)
-      return tokensIndex;
-    // rare edge case handling:
-    // we have to know if we're tokenzing tokens that are part of a string or
-    // regex since we need to be able to tell the difference between when the
-    // objectToken is either 1. part of a array, regex or string or 2. a key
-    // if it's the latter, then we can expect to parse an object after the key
-    if (parsingArray) {
-      if (token.search(']') >= 0)
-        parsingArray = false;
-    } else if (parsingRegex) {
-      if (token.search('/') >= 0)
-        parsingRegex = false;
-    } else if (parsingSingleQuotedString) {
-      if (token.search('\'') >= 0)
-        parsingSingleQuotedString = false;
-    } else if (parsingDoubleQuotedString) {
-      if (token.search('"') >= 0)
-        parsingDoubleQuotedString = false;
-    } else if (tokenBeginsWrap(token, '/')) {
-      parsingRegex = true;
-    } else if (tokenBeginsWrap(token, '\'')) {
-      parsingSingleQuotedString = true;
-    } else if (tokenBeginsWrap(token, '"')) {
-      parsingDoubleQuotedString = true;
-    } else if (tokenBeginsWrap(token, '[')) {
-      parsingArray = true;
-    }  // handles the nested objectToken, see test cases
-    else if (!parsedFirstNestedObj && token === objectToken && leftParenCount - rightParenCount === 1) {
-      return parseObject(objectName, objectToken, thisObj, tokensIndex, true);
-    }  // parenthesis count
-    else if (token === '{') {
+      return currentTokenIndex;
+    else if (token === '{')
       leftParenCount++;
-    } else if (token === '}' || token === '},') {
+    else if (token === '}' || token === '},')
       rightParenCount++;
-    } else if (objectToken === 'query:' && token.length > 1 && token.slice(-1) === ':') {
-      JSONtokens[tokensIndex] = '"' + token.slice(0, -1) + '":';
-    }
-    tokensIndex++;
+
+    currentTokenIndex++;
   } while (leftParenCount !== rightParenCount);
-  thisObj[objectName] = thisObj.tokens.slice(objectStartIndex, tokensIndex).join(' ');
-  if (thisObj[objectName].slice(-2) === '},') {
-    thisObj[objectName] = thisObj[objectName].slice(0, thisObj[objectName].length - 1);
-  }
-  if (objectToken === 'query:') {
-    thisObj.queryShape = JSONtokens.slice(objectStartIndex, tokensIndex).join(' ');
-  }
-  return tokensIndex;
+
+  var objectStr = thisObj.tokens.slice(
+    queryStartIndex, currentTokenIndex
+  ).join(' ');
+  var object = JSONL.parse(objectStr);
+
+  if (object['$comment'])
+    thisObj.comment = object['$comment'];
+
+  if (object.orderby)
+    thisObj.sortShape = object.orderby;
+
+  if (object.query)
+    thisObj.query = object.query;
+  else if (object['$query'])
+    thisObj.query = object['$query'];
+  else
+    thisObj.query = object;
+
+  parseQueryShape(thisObj);
+
+  return currentTokenIndex;
 }
-function tokenBeginsWrap(token, wrapSymbol) {
-  return token === wrapSymbol || token[0] === wrapSymbol && token.slice(-1) !== wrapSymbol && token.slice(-2) !== wrapSymbol + ',';
+// convert objects to flat string 
+// don't want the newlines and extra spaces from JSON.stringify
+// e.g. {"mongoscope_feature":"get instance collections"} -> 
+//      "{ mongoscope_feature: \"get instance collections\" }"
+function JSONFlatStringify(obj) {
+  return JSON.stringify(obj, null, ' ').split(/\s+/).join(' ');
 }
 function parseQueryShape(thisObj) {
-  if (thisObj.query === undefined)
-    return;
-  var queryObject;
-  try {
-    queryObject = JSONL.parse(thisObj.query);
-  } catch (e) {
-    debug('Could not parse literal json %s. error: %s', thisObj.query, e);
-    return;
-  }
-  thisObj.queryShape = JSON.stringify(parseQueryShapeObject(queryObject), null, ' ').replace(/(\r\n|\n|\r)/gm, ' ').replace(/\s+/g, ' ');
+  thisObj.queryShape = parseQueryShapeObject(thisObj.query);
+  setQueryPattern(thisObj);
 }
 function parseQueryShapeObject(obj) {
+  objCopy = JSON.parse(JSON.stringify(obj));
+
   var value;
-  for (var key in obj) {
-    value = obj[key];
+  for (var key in objCopy) {
+    value = objCopy[key];
     if (QUERY_OPS.indexOf(key) > -1)
       return 1;
     if (Array.isArray(value))
-      obj[key] = parseQueryShapeArray(value);
-    else if (typeof value === 'object' && !(value instanceof RegExp))
-      obj[key] = parseQueryShapeObject(value);
+      objCopy[key] = parseQueryShapeArray(value);
+    else if (typeof value === 'objCopyect' && !(value instanceof RegExp))
+      objCopy[key] = parseQueryShapeObjCopyect(value);
     else
-      obj[key] = 1;
+      objCopy[key] = 1;
   }
-  return obj;
+  return objCopy;
 }
 function parseQueryShapeArray(ary) {
   var ele;
@@ -210,6 +191,10 @@ function parseQueryShapeArray(ary) {
       parseQueryShapeObject(ele);
   }
   return ary.sort();
+}
+function setQueryPattern(thisObj) {
+  thisObj.queryPattern = thisObj.namespace + ' ' + 
+    JSONFlatStringify(thisObj.queryShape);
 }
 module.exports.parse = function (lines, opts) {
   opts = opts || {};
