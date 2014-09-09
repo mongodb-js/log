@@ -63,7 +63,7 @@ function Entry(data, opts) {
   }
   if (!data.line || !data.thread) {
     // Message from shell that is not a log entry
-    console.error(data.line);
+    debug('unknown line structure', data);
     return;
   }
   parseOperation(this);
@@ -153,9 +153,9 @@ function parseQuery(thisObj, currentTokenIndex) {
 
   return currentTokenIndex;
 }
-// convert objects to flat string 
+// convert objects to flat string
 // don't want the newlines and extra spaces from JSON.stringify
-// e.g. {"mongoscope_feature":"get instance collections"} -> 
+// e.g. {"mongoscope_feature":"get instance collections"} ->
 //      "{ mongoscope_feature: \"get instance collections\" }"
 function JSONFlatStringify(obj) {
   return JSON.stringify(obj, null, ' ').split(/\s+/).join(' ');
@@ -193,7 +193,7 @@ function parseQueryShapeArray(ary) {
   return ary.sort();
 }
 function setQueryPattern(thisObj) {
-  thisObj.queryPattern = thisObj.namespace + ' ' + 
+  thisObj.queryPattern = thisObj.namespace + ' ' +
     JSONFlatStringify(thisObj.queryShape);
 }
 module.exports.parse = function (lines, opts) {
