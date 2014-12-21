@@ -112,9 +112,10 @@ function parseOperationStat(thisObj, token) {
   }
 }
 function parseQuery(thisObj, currentTokenIndex) {
-  if (thisObj.tokens.indexOf('query:') === -1)
-    return currentTokenIndex;
-  currentTokenIndex++;
+  var queryIndex = thisObj.tokens.indexOf('query:');
+  if (queryIndex === -1) return currentTokenIndex;
+  currentTokenIndex = queryIndex + 1;
+  
   var leftParenCount = 0, rightParenCount = 0;
   var queryStartIndex = currentTokenIndex;
   var token;
@@ -135,13 +136,13 @@ function parseQuery(thisObj, currentTokenIndex) {
 
   var objectStr = thisObj.tokens.slice(
     queryStartIndex, currentTokenIndex
-  ).join(' ');
+  ).join(' ').replace(/},$/, '}');
 
   // wrap non-quoted key names in quotes (to handle dot-notation key names) 
   objectStr = objectStr.replace(/([{,])\s*([^,{\s\'"]+)\s*:/g, ' $1 "$2" :');
-  // first convert log types to ejson
-  var objectStr = log2ejson(objectStr);   
-  // now parse to js object
+  // convert log types to ejson
+  objectStr = log2ejson(objectStr);
+  // parse to js object
   var object = JSONL.parse(objectStr);
 
   if (object['$comment'])
