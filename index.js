@@ -1,6 +1,8 @@
-var JSONL   = require('json-literal'),
-    debug   = require('debug')('mongodb-log'),
-    regret  = require('./patterns');
+var JSONL     = require('json-literal'),
+    debug     = require('debug')('mongodb-log'),
+    log2ejson = require('mongodb-log2ejson'),
+    regret    = require('./patterns');
+
 var OPS       = 'command delete getmore query remove update'.split(' '),
     QUERY_OPS = '$exists $gt $gte $in $lt $lte $nin $regex'.split(' ');
 
@@ -134,6 +136,11 @@ function parseQuery(thisObj, currentTokenIndex) {
   var objectStr = thisObj.tokens.slice(
     queryStartIndex, currentTokenIndex
   ).join(' ');
+
+  // first convert log types to ejson
+  var objectStr = log2ejson(objectStr);
+    
+  // now parse to js object
   var object = JSONL.parse(objectStr);
 
   if (object['$comment'])
