@@ -150,6 +150,7 @@ describe('Operations', function() {
       '{ field1: / { query: } /, query: { query: \' / val3 / aaa\' }, x: 1 }',
       '{ field1: \'blah \" query: \" query: blah\' }',
       '{ field1: [ \'a query: a\' ] }',
+      '{ _types: "User", emails.email: "user@email.com" }',
       '{ $query: {}, $comment: { mongoscope_feature: "get instance collection' + 
       's" } }'
     ],
@@ -170,6 +171,7 @@ describe('Operations', function() {
       { "query": " / val3 / aaa" },
       { field1: 'blah " query: " query: blah' },
       { field1: [ 'a query: a' ] },
+      { _types: "User", "emails.email": "user@email.com" },
       {}
     ];
 

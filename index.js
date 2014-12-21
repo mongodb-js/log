@@ -134,6 +134,10 @@ function parseQuery(thisObj, currentTokenIndex) {
   var objectStr = thisObj.tokens.slice(
     queryStartIndex, currentTokenIndex
   ).join(' ');
+  
+  // wrap non-quoted key names in quotes (to handle dot-notation key names) 
+  objectStr = objectStr.replace(/([{,])\s*([^,{\s\'"]+)\s*:/g, ' $1 "$2" :');
+
   var object = JSONL.parse(objectStr);
 
   if (object['$comment'])
