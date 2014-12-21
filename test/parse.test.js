@@ -98,6 +98,17 @@ describe('parse', function() {
     }
   });
 
+  it('should find query shape in findAndModify' + 
+      ' and handle trailing commas', function () {
+    var line = '2014-06-21T00:11:35.468+0000 [conn524] command mmsdbjobs.$cmd' + 
+               ' command: findAndModify { findandmodify: "data.jobsProcessor",' + 
+               ' query: { $and: [ { scheduledFor: { $lte: 1403309490388 } }, {' + 
+               ' status: "NEW" } ] }, sort: { priority: 1, updated: -1 }, update:' + 
+               ' { $set: { updated: 1403309490388, status: "PRE_OWNED" } }, new:' + 
+               ' true } keyUpdates:0 numYields:0 locks(micros) w:11693 reslen:44 11ms';
+    var res = log.parse(line)[0];
+  })
+
   it('should grok the ready event', function() {
     var expected = [
         {
