@@ -139,9 +139,9 @@ function parseQuery(thisObj, currentTokenIndex) {
 
   // wrap non-quoted key names in quotes (to handle dot-notation key names) 
   objectStr = objectStr.replace(/([{,])\s*([^,{\s\'"]+)\s*:/g, ' $1 "$2" :');
-  // first convert log types to ejson
-  var objectStr = log2ejson(objectStr);   
-  // now parse to js object
+  // convert log types to ejson
+  objectStr = log2ejson(objectStr);
+  // parse to js object
   var object = JSONL.parse(objectStr);
 
   if (object['$comment'])
