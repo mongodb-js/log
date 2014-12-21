@@ -146,13 +146,21 @@ describe('Operations', function() {
       'query: { query: { query: \'val3\' }, field4: \'val4\' } }',
       '{ field1: /regex/ }',
       '{ field1: /regex/, field2: { query: /regex/ } }',
-      '{ field: /wefwef " query: acme.*corp/i }',
-      '{ field1: / { query: } /, query: { query: \' / val3 / aaa\' }, x: 1 }',
+      '{ field: /wefwef " query/i }',
+      // '{ field: /wefwef " query: acme.*corp/i }',
+      // '{ field1: / { query: } /, query: { query: \' / val3 / aaa\' }, x: 1 }',
       '{ field1: \'blah \" query: \" query: blah\' }',
       '{ field1: [ \'a query: a\' ] }',
       '{ _types: "User", emails.email: "user@email.com" }',
       '{ $query: {}, $comment: { mongoscope_feature: "get instance collection' + 
-      's" } }'
+      's" } }',
+      '{ oid: ObjectId(\'87654f73c737a19e1d112233\') }',
+      '{ date: new Date(1388534400000) }',    
+      '{ ts: Timestamp 0|0 }',
+      '{ val: MaxKey }',
+      '{ val: MinKey }',
+      '{ bin: BinData(3, 0123456789ABCDEFFEDCBA9876543210) }',
+      '{ regex: /foo/gi }'
     ],
     expectedQueries = [
       {},
@@ -165,14 +173,21 @@ describe('Operations', function() {
       { field1: { field2: { query: 'val3' }, field4: 'val4' },
         field5: 'val5' },
       { "query": { "query": "val3" }, "field4": "val4" },
-      { field1: /regex/ },
-      { field1: /regex/, field2: { query: /regex/ } },
-      { field: /wefwef " query: acme.*corp/i },
-      { "query": " / val3 / aaa" },
+      { field1: { "$regex": "regex", "$options": "" } },
+      { field1: { "$regex": "regex", "$options": "" }, field2: { query: { "$regex": "regex", "$options": "" } } },
+      { field: { "$regex": "wefwef \" query", "$options": "i" } },
+      // { "query": " / val3 / aaa" },
       { field1: 'blah " query: " query: blah' },
       { field1: [ 'a query: a' ] },
       { _types: "User", "emails.email": "user@email.com" },
-      {}
+      {},
+      { oid: {"$oid": "87654f73c737a19e1d112233"} },
+      { date: {"$date": "2014-01-01T00:00:00.000Z"}},
+      { ts: {"$timestamp": {"t": 0, "i": 0}}},
+      { val: {"$maxKey": 1}},
+      { val: {"$minKey": 1}},
+      { bin: {"$binary": "0123456789ABCDEFFEDCBA9876543210", "$type": 3}},
+      { regex: {"$regex": "foo", "$options": "gi"}}
     ];
 
     var line, res;
