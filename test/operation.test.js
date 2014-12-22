@@ -158,7 +158,8 @@ describe('Operations', function() {
       '{ val: MaxKey }',
       '{ val: MinKey }',
       '{ bin: BinData(3, 0123456789ABCDEFFEDCBA9876543210) }',
-      '{ regex: /foo/gi }'
+      '{ regex: /foo/gi }',
+      '{ s: ""unescaped quotes"" }'
     ],
     expectedQueries = [
       {},
@@ -184,7 +185,8 @@ describe('Operations', function() {
       { val: {"$maxKey": 1}},
       { val: {"$minKey": 1}},
       { bin: {"$binary": "0123456789ABCDEFFEDCBA9876543210", "$type": 3}},
-      { regex: {"$regex": "foo", "$options": "gi"}}
+      { regex: {"$regex": "foo", "$options": "gi"}},
+      { s: "\"unescaped quotes\"" }
     ];
 
     var line, res;
