@@ -138,13 +138,25 @@ function parseQuery(thisObj, currentTokenIndex) {
     queryStartIndex, currentTokenIndex
   ).join(' ').replace(/},$/, '}');
 
+  // work-around for unescaped quotes in strings: https://jira.mongodb.org/browse/SERVER-16620
+  var stringRegex = /([:,\[]\s*)"(.*?)"(\s*[,}\]])/g;
+  var match;
+  while ((match = stringRegex.exec(objectStr)) !== null) {
+    if (match[2].indexOf('"') !== -1) {
+      var s = match[2].replace(/"/g, '\\"');
+      objectStr = objectStr.replace(match[0], match[1] + '"' + s + '"' + match[3] );
+    }
+  }
   // wrap non-quoted key names in quotes (to handle dot-notation key names) 
   objectStr = objectStr.replace(/([{,])\s*([^,{\s\'"]+)\s*:/g, ' $1 "$2" :');
   // convert log types to ejson
   objectStr = log2ejson(objectStr);
   // parse to js object
-  var object = JSONL.parse(objectStr);
-
+  try {
+    var object = JSONL.parse(objectStr);
+  } catch (e) {
+    var object = {};
+  }
   if (object['$comment'])
     thisObj.comment = object['$comment'];
 
