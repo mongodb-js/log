@@ -6,13 +6,18 @@
     "test": "mocha"
   },
   "dependencies": {
-    "debug": "^1.0.4",
-    "json-literal": "^1.1.0",
-    "mongodb-log2ejson": "^0.1.2",
-    "regret": "^0.1.1"
+    "ampersand-state": "~4.4.4",
+    "debug": "~2.1.1",
+    "event-stream": "~3.2.2",
+    "json-literal": "~1.1.0",
+    "lodash": "~3.2.0",
+    "mongodb-log2ejson": "~0.1.2",
+    "regret": "~0.1.1"
   },
   "devDependencies": {
-    "mocha": "^1.20.1"
+    "benchmark": "~1.0.0",
+    "cli-table": "~0.3.1",
+    "mocha": "~2.1.0"
   },
   "keywords": [
     "mongodb",

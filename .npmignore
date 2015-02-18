@@ -1,0 +1,8 @@
+bin/
+examples/
+test/
+.jshintrc
+.jsfmtrc
+.travis.yml
+bench/
+bin/*-bench.js

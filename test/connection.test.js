@@ -7,7 +7,7 @@ describe('Connection', function() {
       'datafile /data/db/test.ns, filling with zeroes...',
       res = log.parse(line)[0];
 
-    assert.equal(res.conn, 'conn700');
+    assert.equal(res.connection_id, 'conn700');
   });
 
   it('should find the id when it\'s accepted', function() {
@@ -15,6 +15,6 @@ describe('Connection', function() {
       'ted from 127.0.0.1:52049 #700 (1 connection now open)',
       res = log.parse(line)[0];
 
-    assert.equal(res.conn, 'conn700');
+    assert.equal(res.connection_id, 'conn700');
   });
 });
