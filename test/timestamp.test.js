@@ -1,5 +1,5 @@
 var assert = require('assert'),
-  log = require('./..');
+  parse = require('./..');
 
 describe('parse', function() {
   it('should parse the timestamp and the timestamp format', function() {
@@ -22,7 +22,7 @@ describe('parse', function() {
       'iso8601-utc': [
         '2014-02-13T18:00:04.709Z',
       ]
-    }
+    };
 
     var line, timestamp, timestamps, res;
 
@@ -32,7 +32,7 @@ describe('parse', function() {
       for (var i = 0; i < timestamps.length; i++) {
         timestamp = timestamps[i];
         line = timestamp + ' [initandlisten] db version v2.5.6 -pre-';
-        res = log.parse(line)[0];
+        res = parse(line)[0];
 
         assert.equal(res.timestamp_format, timestampFormat);
         assert.equal(res.timestamp, timestamp);

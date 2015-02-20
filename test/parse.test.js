@@ -1,4 +1,4 @@
-var log = require('./..'),
+var parse = require('./..'),
   assert = require('assert');
 
 describe('parse', function() {
@@ -10,7 +10,7 @@ describe('parse', function() {
         event: null
       },
       line = 'Wed Mar 12 14:42:31 [initandlisten] db version v2.5.6-pre-',
-      res = log.parse(line)[0];
+      res = parse(line)[0];
 
     assert.equal(res.event, expected.event);
     assert.equal(res.timestamp, expected.timestamp);
@@ -23,12 +23,12 @@ describe('parse', function() {
     'initAndListen: 10309 Unable to create/open lock file: ' +
     '/data/mongod.lock errno:13 Permission denied Is a mongod instance ' +
     'already running?, terminating';
-    var res = log.parse(line)[0];
+    var res = parse(line)[0];
     assert.equal(res.event.name, 'error');
   });
 
   it('should not puke on nulls', function() {
-    log.parse(null);
+    parse(null);
   });
 
   it('should accept multiple lines', function() {
@@ -88,7 +88,7 @@ describe('parse', function() {
         'view):960',
         '2014-05-16T10:48:24.926-0400 [clientcursormon]  connections:22'
       ],
-      res = log.parse(lines);
+      res = parse(lines);
 
     for (var i = 0; i < expected.length; i++) {
       assert.equal(res.event, expected.event);
@@ -98,16 +98,16 @@ describe('parse', function() {
     }
   });
 
-  it('should find query shape in findAndModify' + 
-      ' and handle trailing commas', function () {
-    var line = '2014-06-21T00:11:35.468+0000 [conn524] command mmsdbjobs.$cmd' + 
-               ' command: findAndModify { findandmodify: "data.jobsProcessor",' + 
-               ' query: { $and: [ { scheduledFor: { $lte: 1403309490388 } }, {' + 
-               ' status: "NEW" } ] }, sort: { priority: 1, updated: -1 }, update:' + 
-               ' { $set: { updated: 1403309490388, status: "PRE_OWNED" } }, new:' + 
-               ' true } keyUpdates:0 numYields:0 locks(micros) w:11693 reslen:44 11ms';
-    var res = log.parse(line)[0];
-  })
+  it('should find query shape in findAndModify' +
+  ' and handle trailing commas', function() {
+      var line = '2014-06-21T00:11:35.468+0000 [conn524] command mmsdbjobs.$cmd' +
+      ' command: findAndModify { findandmodify: "data.jobsProcessor",' +
+      ' query: { $and: [ { scheduledFor: { $lte: 1403309490388 } }, {' +
+      ' status: "NEW" } ] }, sort: { priority: 1, updated: -1 }, update:' +
+      ' { $set: { updated: 1403309490388, status: "PRE_OWNED" } }, new:' +
+      ' true } keyUpdates:0 numYields:0 locks(micros) w:11693 reslen:44 11ms';
+      var res = parse(line)[0];
+    });
 
   it('should grok the ready event', function() {
     var expected = [
@@ -135,7 +135,7 @@ describe('parse', function() {
         '2014-05-16T10:50:13.579-0400 [initandlisten] waiting for connections ' +
         'on port 27017'
       ],
-      res = log.parse(lines);
+      res = parse(lines);
 
     for (var i = 0; i < expected.length; i++) {
       assert.equal(res.event, expected.event);

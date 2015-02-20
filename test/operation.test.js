@@ -1,5 +1,5 @@
 var assert = require('assert'),
-  log = require('./..'),
+  parse = require('./..'),
   _ = require('lodash');
 
 describe('Operations', function() {
@@ -17,7 +17,7 @@ describe('Operations', function() {
         'mongoscope_feature': 'get instance collections'
       }
     ];
-    var res = log.parse(lines);
+    var res = parse(lines);
 
     for (var i = 0; i < lines.length; i++) {
       assert.deepEqual(res[i].comment, expectedComments[i]);
@@ -61,7 +61,7 @@ describe('Operations', function() {
       'locks(micros) W:2347 r:243 nreturned:30000 reslen:20 nmoved:11 ' +
       '900000ms';
 
-      res = log.parse(line);
+      res = parse(line);
       assert.equal(res[0].namespace, namespace);
 
       for (var expectedField in namespaceFields[namespace]) {
@@ -122,7 +122,7 @@ describe('Operations', function() {
           }
         }
       ];
-    _.each(log.parse(lines), function(res, i) {
+    _.each(parse(lines), function(res, i) {
       assert.equal(res.operation, expected[i].operation);
       assert.deepEqual(res.stats.serialize(), expected[i].stats);
     });
@@ -283,7 +283,7 @@ describe('Operations', function() {
       'ntoreturn:9 ntoskip:9 nscanned:99 nscannedObjects:0 keyUpdates:9001 ' +
       'numYields:9999 locks(micros) w:1111 R:568 nreturned:0 reslen:20 ' +
       'nmoved:11 ndeleted:100 nupdated:1000 0ms';
-      res = log.parse(line)[0];
+      res = parse(line)[0];
 
       assert.deepEqual(res.query, expectedQueries[i]);
     }
@@ -299,7 +299,7 @@ describe('Operations', function() {
     'numYields:9999 locks(micros) w:1111 R:568 nreturned:0 reslen:20 ' +
     'nmoved:11 ndeleted:100 nupdated:1000 0ms';
 
-    var res = log.parse(line)[0];
+    var res = parse(line)[0];
     assert.equal(res.queryPattern, expectedQueryPattern);
   });
 
@@ -346,7 +346,7 @@ describe('Operations', function() {
       'ntoreturn:9 ntoskip:9 nscanned:99 nscannedObjects:0 keyUpdates:9001 ' +
       'numYields:9999 locks(micros) w:1111 R:568 nreturned:0 reslen:20 ' +
       'nmoved:11 ndeleted:100 nupdated:1000 0ms';
-      res = log.parse(line)[0];
+      res = parse(line)[0];
 
       assert.deepEqual(res.queryShape, expectedQueryShapes[i],
         JSON.stringify(res.queryShape) + ' !== ' + JSON.stringify(expectedQueryShapes[i]) + ' (source: ' + line + ')');
@@ -382,7 +382,7 @@ describe('Operations', function() {
       'ntoreturn:9 ntoskip:9 nscanned:99 nscannedObjects:0 keyUpdates:9001 ' +
       'numYields:9999 locks(micros) w:1111 R:568 nreturned:0 reslen:20 ' +
       'nmoved:11 ndeleted:100 nupdated:1000 0ms';
-      res = log.parse(line)[0];
+      res = parse(line)[0];
 
       assert.deepEqual(res.sortShape, expectedSortShapes[i]);
     }
