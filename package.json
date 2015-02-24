@@ -10,9 +10,9 @@
     "debug": "~2.1.1",
     "event-stream": "~3.2.2",
     "json-literal": "~1.1.0",
-    "lodash": "~3.2.0",
     "mongodb-log2ejson": "~0.1.2",
-    "regret": "~0.1.1"
+    "regret": "~0.1.1",
+    "underscore": "~1.8.2"
   },
   "devDependencies": {
     "benchmark": "~1.0.0",
