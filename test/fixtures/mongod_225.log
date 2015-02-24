@@ -150,8 +150,8 @@ Mon Aug  5 20:27:15 [conn4] replSet info stepping down as primary secs=10
 Mon Aug  5 20:27:16 [conn4] replSet relinquishing primary state
 Mon Aug  5 20:27:16 [conn4] replSet SECONDARY
 Mon Aug  5 20:27:16 [conn4] replSet closing client sockets after relinquishing primary
-Mon Aug  5 20:27:16 [conn4] SocketException handling request, closing client connection: 9001 socket exception [2] server [127.0.0.1:52088] 
-Mon Aug  5 20:27:16 [conn9] SocketException handling request, closing client connection: 9001 socket exception [2] server [10.0.0.12:52098] 
+Mon Aug  5 20:27:16 [conn4] SocketException handling request, closing client connection: 9001 socket exception [2] server [127.0.0.1:52088]
+Mon Aug  5 20:27:16 [conn9] SocketException handling request, closing client connection: 9001 socket exception [2] server [10.0.0.12:52098]
 Mon Aug  5 20:27:16 [rsHealthPoll] replSet info capslock.local:27019 is down (or slow to respond): socket exception [SEND_ERROR] for 10.0.0.12:27019
 Mon Aug  5 20:27:16 [rsHealthPoll] replSet info capslock.local:27018 is down (or slow to respond): socket exception [SEND_ERROR] for 10.0.0.12:27018
 Mon Aug  5 20:27:16 [rsHealthPoll] replSet member capslock.local:27019 is now in state DOWN
@@ -163,7 +163,7 @@ Mon Aug  5 20:27:18 [rsHealthPoll] replSet member capslock.local:27018 is now in
 Mon Aug  5 20:27:18 [rsHealthPoll] replSet member capslock.local:27019 is now in state ARBITER
 Mon Aug  5 20:27:18 [conn28] end connection 10.0.0.12:52183 (3 connections now open)
 Mon Aug  5 20:27:18 [initandlisten] connection accepted from 10.0.0.12:52194 #31 (4 connections now open)
-Mon Aug  5 20:27:21 [conn8] SocketException handling request, closing client connection: 9001 socket exception [2] server [10.0.0.12:52097] 
+Mon Aug  5 20:27:21 [conn8] SocketException handling request, closing client connection: 9001 socket exception [2] server [10.0.0.12:52097]
 Mon Aug  5 20:27:23 [conn29] replSet info voting yea for capslock.local:27018 (1)
 Mon Aug  5 20:27:24 [rsHealthPoll] replSet member capslock.local:27018 is now in state PRIMARY
 Mon Aug  5 20:27:25 [rsBackgroundSync] replSet syncing to: capslock.local:27018
@@ -394,7 +394,6 @@ Mon Aug  5 20:55:12 [conn140] end connection 10.0.0.12:52694 (2 connections now 
 Mon Aug  5 20:55:12 [initandlisten] connection accepted from 10.0.0.12:52702 #142 (3 connections now open)
 Mon Aug  5 20:55:20 [conn141] end connection 10.0.0.12:52695 (2 connections now open)
 Mon Aug  5 20:55:20 [initandlisten] connection accepted from 10.0.0.12:52703 #143 (3 connections now open)
-=== a line without a datetime ===
 Mon Aug  5 20:55:42 [initandlisten] connection accepted from 10.0.0.12:52710 #144 (4 connections now open)
 Mon Aug  5 20:55:50 [conn143] end connection 10.0.0.12:52703 (2 connections now open)
 Mon Aug  5 20:55:50 [initandlisten] connection accepted from 10.0.0.12:52711 #145 (3 connections now open)
@@ -472,7 +471,7 @@ Mon Aug  5 21:04:50 [conn179] end connection 10.0.0.12:52862 (2 connections now 
 Mon Aug  5 21:04:50 [initandlisten] connection accepted from 10.0.0.12:52874 #181 (3 connections now open)
 Mon Aug  5 21:04:52 [signalProcessingThread] got signal 15 (Terminated: 15), will terminate after current cmd ends
 Mon Aug  5 21:04:52 [signalProcessingThread] now exiting
-Mon Aug  5 21:04:52 dbexit: 
+Mon Aug  5 21:04:52 dbexit:
 Mon Aug  5 21:04:52 [signalProcessingThread] shutdown: going to close listening sockets...
 Mon Aug  5 21:04:52 [signalProcessingThread] closing listening socket: 6
 Mon Aug  5 21:04:52 [signalProcessingThread] closing listening socket: 7
@@ -483,7 +482,7 @@ Mon Aug  5 21:04:52 [signalProcessingThread] shutdown: going to close sockets...
 Mon Aug  5 21:04:52 [signalProcessingThread] shutdown: waiting for fs preallocator...
 Mon Aug  5 21:04:52 [rsBackgroundSync] Socket recv() errno:9 Bad file descriptor 10.0.0.12:27018
 Mon Aug  5 21:04:52 [conn180] end connection 10.0.0.12:52871 (2 connections now open)
-Mon Aug  5 21:04:52 [rsBackgroundSync] SocketException: remote: 10.0.0.12:27018 error: 9001 socket exception [1] server [10.0.0.12:27018] 
+Mon Aug  5 21:04:52 [rsBackgroundSync] SocketException: remote: 10.0.0.12:27018 error: 9001 socket exception [1] server [10.0.0.12:27018]
 Mon Aug  5 21:04:52 [signalProcessingThread] shutdown: lock for final commit...
 Mon Aug  5 21:04:52 [conn181] end connection 10.0.0.12:52874 (2 connections now open)
 Mon Aug  5 21:04:52 [conn30] end connection 10.0.0.12:52191 (2 connections now open)
