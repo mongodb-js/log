@@ -1,6 +1,6 @@
 # mongodb-log
 
-[![build status](https://secure.travis-ci.org/imlucas/mongodb-log.png)](http://travis-ci.org/imlucas/mongodb-log)
+[![build status](https://secure.travis-ci.org/mongodb/log.png)](http://travis-ci.org/mongodb/log)
 
 Normalize MongoDB log entries into objects that make sense.
 
