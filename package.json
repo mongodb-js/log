@@ -3,7 +3,7 @@
   "version": "1.2.5",
   "description": "Turn flat mongodb log entires into nice structured objects.",
   "scripts": {
-    "test": "mocha"
+    "test": "istanbul cover _mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | coveralls && rm -rf ./coverag"
   },
   "dependencies": {
     "ampersand-state": "~4.4.4",
@@ -17,6 +17,8 @@
   "devDependencies": {
     "benchmark": "~1.0.0",
     "cli-table": "~0.3.1",
+    "coveralls": "^2.11.2",
+    "istanbul": "^0.3.7",
     "mocha": "~2.1.0"
   },
   "keywords": [
