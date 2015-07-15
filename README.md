@@ -2,7 +2,13 @@
 
 Normalize MongoDB log entries into objects that make sense.
 
-## Example
+## Installation
+
+```bash
+npm install mongodb-log
+```
+
+## Examples
 
 ```javascript
 var parse = require('mongodb-log');
