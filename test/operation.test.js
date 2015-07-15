@@ -1,6 +1,6 @@
 var assert = require('assert');
 var parse = require('./..');
-var _ = require('underscore');
+var map = require('lodash.map');
 
 describe('Operations', function() {
   // comment field
@@ -123,7 +123,7 @@ describe('Operations', function() {
         }
       }
     ];
-    _.each(parse(lines), function(res, i) {
+    map(parse(lines), function(res, i) {
       assert.equal(res.operation, expected[i].operation);
       assert.deepEqual(res.stats.serialize(), expected[i].stats);
     });

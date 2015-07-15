@@ -8,17 +8,27 @@
     "ci": "./node_modules/istanbul/lib/cli.js cover _mocha -- -R spec ./test/*.test.js"
   },
   "check": {
-    "ignore": ["coverage/*", "lib/fix-unescaped-quotes.js"]
+    "ignore": [
+      "coverage/*",
+      "lib/fix-unescaped-quotes.js"
+    ]
   },
-  "precommit": ["check", "test"],
+  "precommit": [
+    "check",
+    "test"
+  ],
   "dependencies": {
     "ampersand-state": "~4.4.4",
     "debug": "~2.1.1",
     "event-stream": "~3.2.2",
     "json-literal": "~1.1.0",
+    "lodash.clone": "^3.0.2",
+    "lodash.isarray": "^3.0.4",
+    "lodash.isobject": "^3.0.2",
+    "lodash.isregexp": "^3.0.3",
+    "lodash.map": "^3.1.4",
     "mongodb-log2ejson": "~0.1.2",
-    "regret": "~0.1.1",
-    "underscore": "~1.8.2"
+    "regret": "~0.1.1"
   },
   "devDependencies": {
     "benchmark": "~1.0.0",
