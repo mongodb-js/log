@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
-var suite = require('../bench'),
-  Table = require('cli-table');
+var suite = require('../bench');
+var Table = require('cli-table');
 
 function formatNumber(number) {
   number = String(number).split('.');
-  return number[0].replace(/(?=(?:\d{3})+$)(?!\b)/g, ',') +
-    (number[1] ? '.' + Number(number[1]).toFixed(2) : '');
+  return number[0].replace(/(?=(?:\d{3})+$)(?!\b)/g, ',')
+    + (number[1] ? '.' + Number(number[1]).toFixed(2) : '');
 }
 suite
   .on('cycle', function(event) {

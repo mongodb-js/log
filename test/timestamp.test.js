@@ -1,10 +1,10 @@
-var assert = require('assert'),
-  parse = require('./..');
+var assert = require('assert');
+var parse = require('./..');
 
 describe('parse', function() {
   it('should parse the timestamp and the timestamp format', function() {
     var timestampFormats = {
-      'ctime': [
+      ctime: [
         'Wed Mar  2 14:42:31.000',
         'Wed Mar 12 14:42:31.000'
       ],
@@ -20,15 +20,16 @@ describe('parse', function() {
       ],
 
       'iso8601-utc': [
-        '2014-02-13T18:00:04.709Z',
+        '2014-02-13T18:00:04.709Z'
       ]
     };
 
-    var line, timestamp, timestamps, res;
-
-    for (var timestampFormat in timestampFormats) {
+    var line;
+    var timestamp;
+    var timestamps;
+    var res;
+    Object.keys(timestampFormats).map(function(timestampFormat) {
       timestamps = timestampFormats[timestampFormat];
-
       for (var i = 0; i < timestamps.length; i++) {
         timestamp = timestamps[i];
         line = timestamp + ' [initandlisten] db version v2.5.6 -pre-';
@@ -37,6 +38,6 @@ describe('parse', function() {
         assert.equal(res.timestamp_format, timestampFormat);
         assert.equal(res.timestamp, timestamp);
       }
-    }
+    });
   });
 });
