@@ -176,10 +176,30 @@ fs.createReadStream('/var/log/mongodb/mongod.log')
 `_id` - *String*
 `concat(timestamp, thread)`
 
-`connection_id` - *String*
-`concat('conn', thread)`
+`operation` - *String*
 
-#### Threads / Connections
+Some log lines are "operations" (query, getmore, update, delete, command).
+These do not match up with the `OP_*` opcodes of the wire protocol (e.g.
+commands are queries on a special `.$cmd` collection), but should be seen as
+"logical" operations. Operations have a type (query, getmore, update, delete,
+command), a namespace on which the operation is executed and a duration in
+milliseconds. A `namespace=concat(database_name, '.', collection_name)`. See [mongodb-ns][mongodb-ns] for more details on namespaces.
+
+The exposed regex capture groups are `operation`, `namespace`, `database`,
+`collection`, `duration` and `index`.
+
+Some other events do not follow the operations pattern but still have a
+duration that is useful to extract, for example:
+
+```
+Tue Jan 28 21:46:14.886 [DataFileSync] flushing mmaps took 10973ms  for 21 files
+```
+
+The `duration` of these lines should also be extracted (here 10973
+milliseconds) and exposed via the `duration` name.
+
+`connection_id` - *String*
+`thread` - *String*
 
 The `thread` is listed in square brackets after the timestamp. The example
 below shows two lines with threads `conn611` and `initandlisten`.
@@ -317,3 +337,4 @@ Apache 2.0
 [gitter_img]: https://badges.gitter.im/Join%20Chat.svg
 [LogEntry]: #logentry
 [gitter_url]: https://gitter.im/mongodb-js/mongodb-js
+[mongodb-ns]: https://github.com/mongodb-js/ns
