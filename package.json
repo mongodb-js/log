@@ -39,6 +39,6 @@
     "url": "http://github.com/mongodb-js/log.git"
   },
   "author": "Lucas Hrabovsky <hrabovsky.lucas@gmail.com> (http://imlucas.com)",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "homepage": "http://github.com/mongodb-js/log"
 }
