@@ -146,6 +146,20 @@ console.log('i even understand events! → ', JSON.stringify(parse(
 //   ]
 ```
 
+## API
+
+```javascript
+var parse = require('mongodb-log')
+parse(lines);
+```
+#### parse(lines)
+
+Returns an array of [`LogEntry`][LogEntry] instances.
+
+#### parse()
+
+Returns a transform stream you can pipe the contents of log files into:
+
 ```javascript
 var parse = require('mongodb-log');
 var fs = require('fs');
@@ -156,6 +170,139 @@ fs.createReadStream('/var/log/mongodb/mongod.log')
   .pipe(parse())
   .pipe(fs.createWriteStream('/var/log/mongodb/mongod.json'));
 ```
+
+### LogEntry
+
+`_id` - *String*
+`concat(timestamp, thread)`
+
+`connection_id` - *String*
+`concat('conn', thread)`
+
+#### Threads / Connections
+
+The `thread` is listed in square brackets after the timestamp. The example
+below shows two lines with threads `conn611` and `initandlisten`.
+
+```
+2014-05-16T10:39:00.938-0400 [conn611] end connection 127.0.0.1:57499 (22
+connections now open)
+2014-05-16T10:50:13.450-0400 [initandlisten] recover : no journal files resent, no recovery needed
+```
+
+Each connection is its own thread, for example `conn611` above. While
+everything happening on that connection (including its end, see example above)
+has the correct thread name, the opening of the connection is handled by the
+`initandlisten` thread (in mongod) and the `mongosMain` thread (in mongos).
+
+It's often interesting to know when a certain connection was opened.
+Therefore, a second regex capture named `conn` is exposed, that returns the
+connection name even for the "connection accepted" log line. The connection
+name can be extracted from the `#<number>` value after the IP address and
+port. For example:
+
+```
+2014-05-31T14:21:14.734-0400 [initandlisten] connection accepted from
+127.0.0.1:51786 #14 (3 connections now open)
+2014-05-31T14:21:14.734-0400 [conn14] command admin.$cmd command: isMaster
+{ ismaster: 1 } keyUpdates:0 numYields:0  reslen:371 0ms
++2014-05-31T14:21:14.735-0400 [conn14] end connection 127.0.0.1:51786 (2 connections now open)
+```
+
+| line ## |    `thread`   | `conn` |
+| ------ | ------------- | ------ |
+|      1 | initandlisten | conn14 |
+|      2 | conn14        | conn14 |
+|      3 | conn14        | conn14 |
+
+`timestamp_format` - *String*
+
+There are 4 possible formats MongoDB logs use depending on the server's version:
+
+| timestamp_format | MongoDB Version |            Example             |
+| ---------------- | --------------- | ------------------------------ |
+| ctime            | 2.4             | `Wed Dec 31 19:00:00.000`      |
+| ctime-pre2.4     | < 2.4           | `Wed Dec 31 19:00:00`          |
+| iso8601-local    | 2.6             | `1969-12-31T19:00:00.000+0500` |
+| iso8601-utc      | 2.6             | `1970-01-01T00:00:00.000Z`     |
+
+#### Events
+
+MongoDB logs a large number of unstructured event lines that follow the
+simple pattern:
+
+```
+{{timestamp}} [{{thread}}] {{description}}
+```
+
+Some of these events are generally more useful for issue diagnosis and should
+be extracted, for example
+
+* Start and termination of the server
+* Index builds (start, progress, end)
+* Map Reduce jobs
+
+Events have an event name (for example "ready", "index", ...) and optionally
+some data specific to the event. They are returned as a document of the form
+`{"name": "index", "data": { ... }`.
+
+`stats` - *[`OperationStats`](#operationstats)*
+
+### OperationStats
+
+Some operations (mostly CRUD operations) return values for the following:
+
+`to_return_count` - *Number*
+`ntoreturn` [Default: `0`].
+
+`to_skip_count` - *Number*
+`ntoskip` [Default: `0`].
+
+`scanned_count` - *Number*
+`nscanned` [Default: `0`].
+
+`scanned_object_count` - *Number*
+[Default: `0`].
+
+`key_update_count` - *Number*
+[Default: `0`].
+
+`yield_count` - *Number*
+`numYields` [Default: `0`].
+
+`returned_count` - *Number*
+`nreturned` [Default: `0`].
+
+`result_length` - *Number*
+[Default: `0`].
+
+`moved_count` - *Number*
+`nmoved` [Default: `0`].
+
+`deleted_count` - *Number*
+`ndeleted` [Default: `0`].
+
+`updated_count` - *Number*
+`nupdated` [Default: `0`].
+
+#### Locks
+
+Some operations require to take read/write locks. These lock times are
+measured in microseconds. They follow this pattern (an operation either prints
+read `r` or write `w` lock times, but not both).  `mongodb-log` maps these to
+`read_lock_time` and `write_lock_time` respectively.
+
+```
+locks(micros) r:106
+```
+
+In this case, the read lock was held for 106 microseconds.
+
+`write_lock_time` - *Number*
+`w` as milliseconds [Default: `0`].
+
+`read_lock_time` - *Number*
+`r` as milliseconds [Default: `0`].
 
 ## License
 
@@ -168,4 +315,5 @@ Apache 2.0
 [coverage_img]: https://coveralls.io/repos/mongodb-js/log/badge.svg?branch=master
 [coverage_url]: https://coveralls.io/r/mongodb-js/log
 [gitter_img]: https://badges.gitter.im/Join%20Chat.svg
+[LogEntry]: #logentry
 [gitter_url]: https://gitter.im/mongodb-js/mongodb-js
