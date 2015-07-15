@@ -26,7 +26,7 @@ console.log('`' + line + '` → ', JSON.stringify(parse(line), null, 2));
 
 ```javascript
 var parse = require('mongodb-log');
-var lines = [
+var entries = [
   '2014-05-16T10:39:00.938-0400 [conn611] end connection 127.0.0.1:57499 (22 connections now open)',
   '2014-05-16T10:43:24.840-0400 [clientcursormon] mem (MB) res:9 virt:3514',
   '2014-05-16T10:43:24.840-0400 [clientcursormon]  mapped (incl journal view):960',
@@ -35,11 +35,11 @@ var lines = [
   '2014-05-16T10:48:24.926-0400 [clientcursormon]  mapped (incl journal view):960',
   '2014-05-16T10:48:24.926-0400 [clientcursormon]  connections:22'
 ];
-console.log('lots of lines → ', JSON.stringify(parse(lines), null, 2));
+console.log('lots of entries → ', JSON.stringify(parse(entries), null, 2));
 
 // Prints out:
 //
-//   lots of lines →  [
+//   lots of entries →  [
 //     [
 //       {
 //         "timestamp": "2014-05-16T10:39:00.938-0400",
@@ -150,9 +150,9 @@ console.log('i even understand events! → ', JSON.stringify(parse(
 
 ```javascript
 var parse = require('mongodb-log')
-parse(lines);
+parse(entries);
 ```
-#### parse(lines)
+#### parse(entries)
 
 Returns an array of [`LogEntry`][LogEntry] instances.
 
@@ -173,20 +173,16 @@ fs.createReadStream('/var/log/mongodb/mongod.log')
 
 ### LogEntry
 
-`_id` - *String*
-`concat(timestamp, thread)`
+#### `LogEntry.prototype._id`
+*String* - Unique identifier for this entry. `concat(timestamp, thread)`
 
-`operation` - *String*
+#### `LogEntry.prototype.operation`
+*String*
 
-Some log lines are "operations" (query, getmore, update, delete, command).
-These do not match up with the `OP_*` opcodes of the wire protocol (e.g.
-commands are queries on a special `.$cmd` collection), but should be seen as
-"logical" operations. Operations have a type (query, getmore, update, delete,
+Operations have a type (query, getmore, update, delete,
 command), a namespace on which the operation is executed and a duration in
-milliseconds. A `namespace=concat(database_name, '.', collection_name)`. See [mongodb-ns][mongodb-ns] for more details on namespaces.
-
-The exposed regex capture groups are `operation`, `namespace`, `database`,
-`collection`, `duration` and `index`.
+milliseconds. These do not match up with the `OP_*` opcodes of the wire protocol (e.g. commands are queries on a special `.$cmd` collection), but should be seen
+as "logical" operations. A `namespace=concat(database_name, '.', collection_name)`. See [mongodb-ns][mongodb-ns] for more details on namespaces.
 
 Some other events do not follow the operations pattern but still have a
 duration that is useful to extract, for example:
@@ -195,14 +191,17 @@ duration that is useful to extract, for example:
 Tue Jan 28 21:46:14.886 [DataFileSync] flushing mmaps took 10973ms  for 21 files
 ```
 
-The `duration` of these lines should also be extracted (here 10973
+The `duration` of these entries should also be extracted (here 10973
 milliseconds) and exposed via the `duration` name.
 
-`connection_id` - *String*
+#### `LogEntry.prototype.connection_id`
+*String*
+
+#### `LogEntry.prototype.thread`
 `thread` - *String*
 
 The `thread` is listed in square brackets after the timestamp. The example
-below shows two lines with threads `conn611` and `initandlisten`.
+below shows two entries with threads `conn611` and `initandlisten`.
 
 ```
 2014-05-16T10:39:00.938-0400 [conn611] end connection 127.0.0.1:57499 (22
@@ -235,7 +234,9 @@ port. For example:
 |      2 | conn14        | conn14 |
 |      3 | conn14        | conn14 |
 
-`timestamp_format` - *String*
+#### `LogEntry.prototype.timestamp_format`
+
+*String*
 
 There are 4 possible formats MongoDB logs use depending on the server's version:
 
@@ -246,9 +247,11 @@ There are 4 possible formats MongoDB logs use depending on the server's version:
 | iso8601-local    | 2.6             | `1969-12-31T19:00:00.000+0500` |
 | iso8601-utc      | 2.6             | `1970-01-01T00:00:00.000Z`     |
 
-#### Events
+#### `LogEntry.prototype.event`
 
-MongoDB logs a large number of unstructured event lines that follow the
+*Object*
+
+MongoDB logs a large number of unstructured event entries that follow the
 simple pattern:
 
 ```
@@ -268,44 +271,46 @@ some data specific to the event. They are returned as a document of the form
 
 `stats` - *[`OperationStats`](#operationstats)*
 
-### OperationStats
+#### `LogEntry.prototype.stats`
+
+*OperationStats*
 
 Some operations (mostly CRUD operations) return values for the following:
 
-`to_return_count` - *Number*
-`ntoreturn` [Default: `0`].
+##### `OperationStats.prototype.to_return_count`
+*Number* - `ntoreturn` [Default: `0`].
 
-`to_skip_count` - *Number*
-`ntoskip` [Default: `0`].
+##### `OperationStats.prototype.to_skip_count`
+*Number* `ntoskip` [Default: `0`].
 
-`scanned_count` - *Number*
-`nscanned` [Default: `0`].
+##### `OperationStats.prototype.scanned_count`
+*Number* - `nscanned` [Default: `0`].
 
-`scanned_object_count` - *Number*
-[Default: `0`].
+##### `OperationStats.prototype.scanned_object_count`
+*Number* - `nscanned` [Default: `0`].
 
-`key_update_count` - *Number*
-[Default: `0`].
+##### `OperationStats.prototype.key_update_count`
+*Number* - [Default: `0`].
 
-`yield_count` - *Number*
-`numYields` [Default: `0`].
+##### `OperationStats.prototype.yield_count`
+*Number* - `numYields` [Default: `0`].
 
-`returned_count` - *Number*
-`nreturned` [Default: `0`].
+##### `OperationStats.prototype.returned_count`
+*Number*  - `nreturned` [Default: `0`].
 
-`result_length` - *Number*
-[Default: `0`].
+##### `OperationStats.prototype.result_length`
+*Number* - [Default: `0`].
 
-`moved_count` - *Number*
-`nmoved` [Default: `0`].
+##### `OperationStats.prototype.moved_count`
+*Number* - `nmoved` [Default: `0`].
 
-`deleted_count` - *Number*
-`ndeleted` [Default: `0`].
+##### `OperationStats.prototype.deleted_count`
+*Number* - `ndeleted` [Default: `0`].
 
-`updated_count` - *Number*
-`nupdated` [Default: `0`].
+##### `OperationStats.prototype.updated_count`
+*Number* - `nupdated` [Default: `0`].
 
-#### Locks
+##### `OperationStats.prototype.*_lock_time`
 
 Some operations require to take read/write locks. These lock times are
 measured in microseconds. They follow this pattern (an operation either prints
@@ -318,11 +323,11 @@ locks(micros) r:106
 
 In this case, the read lock was held for 106 microseconds.
 
-`write_lock_time` - *Number*
-`w` as milliseconds [Default: `0`].
+##### `OperationStats.prototype.write_lock_time`
+*Number* - `w` as milliseconds [Default: `0`].
 
-`read_lock_time` - *Number*
-`r` as milliseconds [Default: `0`].
+##### `OperationStats.prototype.read_lock_time`
+*Number* - `r` as milliseconds [Default: `0`].
 
 ## License
 
