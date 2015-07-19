@@ -125,7 +125,7 @@ describe('Operations', function() {
     ];
     map(parse(lines), function(res, i) {
       assert.equal(res.operation, expected[i].operation);
-      assert.deepEqual(res.stats.serialize(), expected[i].stats);
+      assert.deepEqual(res.stats, expected[i].stats);
     });
   });
 

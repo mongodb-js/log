@@ -1,4 +1,4 @@
-var log = require('../');
+var parse = require('../');
 var benchmark = require('benchmark');
 
 module.exports = new benchmark.Suite('default')
@@ -8,11 +8,11 @@ module.exports = new benchmark.Suite('default')
       + 'keyUpdates:0 numYields:0 locks(micros) W:2347 r;:243 nreturned:30000 '
       + 'reslen:20 nmoved:11 ninserted:100 900000ms';
 
-    log.parse([msg]);
+    parse(msg);
   })
   .add('without operation', function() {
     var msg = 'Wed Mar 12 14:42:31 [initandlisten] db version v2.5.6-pre-';
-    log.parse([msg]);
+    parse(msg);
   });
 // @todo: sync vs. async
 //
