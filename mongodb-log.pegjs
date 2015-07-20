@@ -170,7 +170,7 @@ severity
 context_connection = '[conn' connection_id:$(DIGIT+) ']' { return { 'connection_id': parseInt(connection_id, 10) } }
 context_thread = '[' thread:$([a-zA-Z]+) ']' { return { 'thread': thread } }
 context = context_connection / context_thread
-// query_spec: { $query: { $comment: "GetMaxEventVersion:18689@hz452c38n1.ms.com:pool-12-thread-4:3468", _id.id: "7DrXoB5+EeWZkBsGgxonAA==" }, $orderby: { _id.version: -1 } }
+
 // 'query ' ns:ns 'query: ' query:query_spec ws stats:query_stats ws duration:duration
 duration = duration:$(DIGIT+) 'ms' { return { 'duration': parseInt(duration, 10) } }
 
@@ -198,6 +198,19 @@ mr_stats
     }
   }
 
+getmore_stats
+  = 'cursorid:' cursor_id:$(DIGIT+) ws 'ntoreturn:' to_return_count:$(DIGIT+) ws 'keyUpdates:' key_updates_count:$(DIGIT+) ws 'numYields: ' yield_count:$(DIGIT+) ws 'locks(micros) r:' read_lock_time:$(DIGIT+) ws 'nreturned:' returned_count:$(DIGIT+) ws 'reslen:' result_length:$(DIGIT+) ws {
+    return {
+      cursor_id: parseInt(cursor_id, 10),
+      to_return_count: parseInt(to_return_count, 10),
+      key_updates_count: parseInt(key_updates_count, 10),
+      yield_count: parseInt(yield_count, 10),
+      read_lock_time: parseInt(read_lock_time, 10),
+      returned_count: parseInt(returned_count, 10),
+      result_length: parseInt(result_length, 10)
+    };
+  }
+
 ns = database:$([a-zA-Z]+) '.' collection:$([a-zA-Z]+) {
     return {
       'database': database,
@@ -218,27 +231,50 @@ line_before_30
     };
   }
 
+
+getmore_before_30
+  = ts:timestamp ws context:context ws 'getmore' ws ns:ns ws 'query:' query:JSON_text stats:getmore_stats duration:duration {
+    return {
+      'template': 'getmore_before_30',
+      'operation': 'GETMORE',
+      'timestamp': ts.timestamp,
+      'timestamp_format': ts.timestamp_format,
+      'thread': context.thread,
+      'connection_id': context.connection_id,
+      'database': ns.database,
+      'collection': ns.collection,
+      'duration': duration,
+      'query': query.$query,
+      'sort': query.$orderby,
+      'stats': stats,
+      'duration': duration.duration
+    };
+  }
+
 query_before_30
-    = ts:timestamp ws context:context ws 'query' ws ns:ns ws 'query:' query:JSON_text stats:query_stats duration:duration {
-      return {
-        'timestamp': ts.timestamp,
-        'timestamp_format': ts.timestamp_format,
-        'thread': context.thread,
-        'connection_id': context.connection_id,
-        'database': ns.database,
-        'collection': ns.collection,
-        'duration': duration,
-        'query': query.$query,
-        'sort': query.$orderby,
-        'stats': stats,
-        'duration': duration.duration
-      };
-    }
+  = ts:timestamp ws context:context ws 'query'   ws ns:ns ws 'query:' query:JSON_text stats:query_stats duration:duration {
+    return {
+      'template': 'query_before_30',
+      'operation': 'QUERY',
+      'timestamp': ts.timestamp,
+      'timestamp_format': ts.timestamp_format,
+      'thread': context.thread,
+      'connection_id': context.connection_id,
+      'database': ns.database,
+      'collection': ns.collection,
+      'duration': duration,
+      'query': query.$query,
+      'sort': query.$orderby,
+      'stats': stats,
+      'duration': duration.duration
+    };
+  }
 
 mr_before_30
   = ts:timestamp ws context:context ws 'command' ws database:$([a-zA-Z]+) ws '.$cmd command:' spec:JSON_text stats:mr_stats duration:duration {
     return {
       'template': 'mr_before_30',
+      'operation': 'MAPREDUCE',
       'timestamp': ts.timestamp,
       'timestamp_format': ts.timestamp_format,
       'thread': context.thread,
@@ -257,6 +293,7 @@ mr_before_30
 line
   = query_before_30
   / mr_before_30
+  / getmore_before_30
   / line_before_30
   / line_30
 
