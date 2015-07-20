@@ -381,6 +381,30 @@ options_dump
     };
   }
 
+
+// 2014-06-21T00:11:22.656+0000 [conn517] command admin.$cmd command: replSetHeartbeat { replSetHeartbeat: "mmsconfig1", v: 45, pv: 1, checkEmpty: false, from: "mms-db-3.nj1.10gen.cc:27500", fromId: 8 } ntoreturn:1 keyUpdates:0 numYields:0  reslen:208 0ms
+replset_heartbeat
+  = ts:timestamp context:context 'command admin.$cmd command: replSetHeartbeat' spec:JSON_text 'ntoreturn:' to_return_count:$(DIGIT+) ws 'keyUpdates:' key_updates_count:$(DIGIT+) ws 'numYields:' yield_count:$(DIGIT+) ws ws 'reslen:'result_length:$(DIGIT+) ws duration:duration {
+    return {
+      'template': 'replset_heartbeat',
+      'operation': 'REPLSET-HEARTBEAT',
+      'timestamp': ts.timestamp,
+      'timestamp_format': ts.timestamp_format,
+      'thread': context.thread,
+      'connection_id': context.connection_id,
+      'stats': {
+        to_return_count: parseInt(to_return_count, 10),
+        key_updates_count: parseInt(key_updates_count, 10),
+        yield_count: parseInt(yield_count, 10),
+        result_length: parseInt(result_length, 10)
+      },
+      'duration': duration.duration
+    };
+  }
+
+replset_events
+  = replset_heartbeat
+
 errors "error events"
   = error_removing_journal
   / error_couldnt_remove_journal
@@ -390,6 +414,7 @@ events
   = errors
   / exit_event
   / options_dump
+  / replset_events
 
 PATH = $([a-zA-Z0-9\$\.\_/]+)
 
@@ -417,7 +442,7 @@ line_30
 /**
  * [json.pegjs](https://github.com/pegjs/pegjs/blob/master/examples/json.pegjs)
  */
- JSON_text
+JSON_text "json value"
    = ws value:value ws { return value; }
 
  begin_array     = ws "[" ws
@@ -439,9 +464,9 @@ line_30
  null  = "null"  { return null;  }
  true  = "true"  { return true;  }
 
- /* ----- 4. Objects ----- */
+/* ----- 4. Objects ----- */
 
- object
+object "json object"
  = begin_object
    members:(
      first:member
@@ -468,7 +493,7 @@ member
 
 /* ----- 5. Arrays ----- */
 
-array
+array "json array"
  = begin_array
    values:(
      first:value

@@ -1,0 +1,1 @@
+2014-06-21T00:11:22.656+0000 [conn517] command admin.$cmd command: replSetHeartbeat { replSetHeartbeat: "mmsconfig1", v: 45, pv: 1, checkEmpty: false, from: "mms-db-3.nj1.10gen.cc:27500", fromId: 8 } ntoreturn:1 keyUpdates:0 numYields:0  reslen:208 0ms

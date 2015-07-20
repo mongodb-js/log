@@ -105,4 +105,12 @@ describe('integration', function() {
       done();
     });
   });
+
+  it('should handle replset heartbeat commands', function(done) {
+    parseFixture('replset-heartbeat', function(err, data) {
+      if (err) return done(err);
+
+      done();
+    });
+  });
 });
