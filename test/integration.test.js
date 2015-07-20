@@ -107,8 +107,14 @@ describe('integration', function() {
   });
 
   it('should handle replset heartbeat commands', function(done) {
-    parseFixture('replset-heartbeat', function(err, data) {
+    parseFixture('replset-heartbeat', function(err, lines) {
       if (err) return done(err);
+
+      var d = lines[0];
+      assert.equal(d.template, 'replset_heartbeat');
+      assert.equal(d.operation, 'REPLSET-HEARTBEAT');
+      assert.equal(d.duration, 0);
+      assert.equal(d.stats.result_length, 208);
 
       done();
     });

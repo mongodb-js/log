@@ -398,6 +398,7 @@ replset_heartbeat
         yield_count: parseInt(yield_count, 10),
         result_length: parseInt(result_length, 10)
       },
+      spec: spec,
       'duration': duration.duration
     };
   }
