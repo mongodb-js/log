@@ -11,6 +11,8 @@
   "check": {
     "ignore": [
       "coverage/*",
+      "bench/*",
+      "bin/*",
       "lib/fix-unescaped-quotes.js"
     ]
   },

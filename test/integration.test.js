@@ -3,7 +3,7 @@ var parse = require('./..');
 var parseFixture = require('./helpers').parseFixture;
 
 describe('integration', function() {
-  it.skip('should parse collscans.log', function(done) {
+  it('should parse collscans.log', function(done) {
     parseFixture('collscans', function(err, data) {
       if (err) return done(err);
       assert.equal(data.length, 1081);

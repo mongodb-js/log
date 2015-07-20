@@ -38,6 +38,7 @@ start = line
 date_year = $(DIGIT DIGIT DIGIT DIGIT)
 date_month "MM 01-12" = $(DIGIT DIGIT)
 date_mday "DD 01-31" = $(DIGIT DIGIT)
+date_day "D 1-31" = $(DIGIT)
 date "YYYY-MM-DD" = $(date_year '-' date_month '-' date_mday)
 abbrv_days "ddd" = 'Mon' / 'Tue' / 'Wed' / 'Thu' / 'Fri' / 'Sat' / 'Sun'
 abbrv_months "MMM" = 'Jan' / 'Feb' / 'Mar' / 'Apr' / 'May' / 'Jun' / 'Jul' / 'Aug' / 'Sep' / 'Oct' / 'Nov' / 'Dec'
@@ -70,7 +71,7 @@ ctime_no_ms
 //   assert.equal(res.timestamp_format, 'MMM ddd D hh:mm:ss.SSS');
 // });
 ctime
-  = value:$(abbrv_days ws abbrv_months ws date_mday ws time time_fraction) {
+  = value:$(abbrv_days ws abbrv_months ws date_day ws time time_fraction) {
     return {
       'timestamp': value,
       // @todo: D (`1`) or DD (`01`)?
@@ -224,20 +225,21 @@ update_stats
     };
   }
 
-ns = ws database:$([a-zA-Z]+) '.' collection:$([a-zA-Z]+) ws {
+ns = ws database:$([a-zA-Z]+) '.' collection:$([a-zA-Z\.]+) ws {
     return {
       'database': database,
       'collection': collection
     };
   }
 
-message = char*
+message = chars:char* {
+  return chars.join('');
+}
 
 line_before_30
   = ts:timestamp context:context message:message {
     return {
       'timestamp': ts.timestamp,
-      'timestamp_format': ts.timestamp_format,
       'thread': context.thread,
       'connection_id': context.connection_id,
       'message': message
@@ -320,14 +322,84 @@ update_before_30
     };
   }
 
+// Thu Mar  6 13:09:01.670 [signalProcessingThread] error removing journal files boost::filesystem::directory_iterator::construct: No such file or directory: "/Users/tr/Documents/tmp/data/db/journal"
+error_removing_journal
+  = ts:timestamp context:context 'error removing journal files boost::filesystem::directory_iterator::construct: No such file or directory: "' path:PATH '"'{
+    return {
+      timestamp: ts.timestamp,
+      thread: context.thread,
+      event: {
+        name: 'error',
+        message: 'error removing journal files',
+        path: path
+      }
+    };
+  }
+
+error_couldnt_remove_journal
+  = ts:timestamp context:context "error couldn't remove journal file during shutdown boost::filesystem::directory_iterator::construct: No such file or directory: " quotation_mark path:PATH quotation_mark {
+    return {
+      timestamp: ts.timestamp,
+      thread: context.thread,
+      event: {
+        name: 'error',
+        message: 'could not remove journal file',
+        path: path
+      }
+    };
+  }
+
+// shutdown failed with exception
+shutdown_failed
+  = ts:timestamp ws 'shutdown failed with exception' {
+    return {
+      timestamp: ts.timestamp,
+      event: {
+        name: 'error',
+        message: 'shutdown failed with exception'
+      }
+    };
+  }
+
+exit_event
+  = ts:timestamp ws 'dbexit: really exiting now'
+  / ts:timestamp ws 'dbexit: ' {
+    return {
+      timestamp: ts.timestamp,
+      event: {
+        name: 'exit'
+      }
+    }
+  }
+
+options_dump
+  = ts:timestamp context:context 'options:' options:JSON_text {
+    return {
+      timestamp: ts.timestamp,
+      thread: context.thread,
+      options: options
+    };
+  }
+
+errors "error events"
+  = error_removing_journal
+  / error_couldnt_remove_journal
+  / shutdown_failed
+
+events
+  = errors
+  / exit_event
+  / options_dump
+
+PATH = $([a-zA-Z0-9\$\.\_/]+)
+
 line
   = query_before_30
   / mr_before_30
   / getmore_before_30
   / update_before_30
+  / events
   / line_before_30
-  / line_30
-
 
 line_30
   = ts:timestamp ws severity:severity ws component:component context:context message:message {
@@ -338,7 +410,7 @@ line_30
       'component': component,
       'thread': context.thread,
       'connection_id': context.connection_id,
-      'message': message
+      'message': message.join('')
     };
   }
 
