@@ -1,7 +1,7 @@
 var assert = require('assert');
 var parse = require('./..');
 
-describe('Connection', function() {
+describe.skip('Connection', function() {
   it('should find the id', function() {
     var line = '2014-06-02T14:29:05.850-0400 [conn700] allocating new '
       + 'datafile /data/db/test.ns, filling with zeroes...';

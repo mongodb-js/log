@@ -3,6 +3,7 @@
   "version": "1.2.5",
   "description": "Turn flat mongodb log entires into nice structured objects.",
   "scripts": {
+    "build": "pegjs mongodb-log.pegjs lib/grammar.js",
     "check": "mongodb-js-precommit",
     "test": "mocha",
     "ci": "./node_modules/istanbul/lib/cli.js cover _mocha -- -R spec ./test/*.test.js"
@@ -29,6 +30,7 @@
     "lodash.map": "^3.1.4",
     "lodash.trim": "^3.0.1",
     "mongodb-log2ejson": "~0.1.3",
+    "pegjs": "^0.8.0",
     "regret": "~0.1.2"
   },
   "devDependencies": {

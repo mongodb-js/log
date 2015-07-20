@@ -1,7 +1,7 @@
 var parse = require('./..');
 var assert = require('assert');
 
-describe('parse', function() {
+describe.skip('parse', function() {
   it('should match the old format', function() {
     var expected = {
       thread: 'initandlisten',

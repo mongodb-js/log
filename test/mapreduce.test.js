@@ -1,7 +1,7 @@
 var assert = require('assert');
 var parseFixture = require('./helpers').parseFixture;
 
-describe('mapreduce', function() {
+describe.skip('mapreduce', function() {
   it('should work', function(done) {
     parseFixture('mapreduce', function(err, lines) {
       if (err) return done(err);

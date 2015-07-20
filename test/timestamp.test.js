@@ -1,7 +1,7 @@
 var assert = require('assert');
 var parse = require('./..');
 
-describe('parse', function() {
+describe.skip('parse', function() {
   it('should parse the timestamp and the timestamp format', function() {
     var timestampFormats = {
       ctime: [

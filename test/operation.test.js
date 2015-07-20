@@ -2,7 +2,7 @@ var assert = require('assert');
 var parse = require('./..');
 var map = require('lodash.map');
 
-describe('Operations', function() {
+describe.skip('Operations', function() {
   // comment field
   it('should parse the comment field', function() {
     var lines = [
