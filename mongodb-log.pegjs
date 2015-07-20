@@ -175,8 +175,8 @@ context = context_connection / context_thread
 duration = duration:$(DIGIT+) 'ms' { return { 'duration': parseInt(duration, 10) } }
 
 // ntoreturn:1 ntoskip:0 nscanned:0 keyUpdates:0 locks(micros) r:8457 nreturned:0 reslen:20
-query_stats =
-  'ntoreturn:' to_return_count:$(DIGIT+) ws 'ntoskip:' to_skip_count:$(DIGIT+) ws 'nscanned:' scanned_count:$(DIGIT+) ws 'keyUpdates:' key_updates_count:$(DIGIT+) ws 'locks(micros) r:' read_lock_time:$(DIGIT+) ws 'nreturned:' returned_count:$(DIGIT+) ws 'reslen:' result_length:$(DIGIT+) ws {
+query_stats
+  = 'ntoreturn:' to_return_count:$(DIGIT+) ws 'ntoskip:' to_skip_count:$(DIGIT+) ws 'nscanned:' scanned_count:$(DIGIT+) ws 'keyUpdates:' key_updates_count:$(DIGIT+) ws 'locks(micros) r:' read_lock_time:$(DIGIT+) ws 'nreturned:' returned_count:$(DIGIT+) ws 'reslen:' result_length:$(DIGIT+) ws {
     return {
       to_return_count: parseInt(to_return_count, 10),
       to_skip_count: parseInt(to_skip_count, 10),
@@ -187,6 +187,17 @@ query_stats =
       result_length: parseInt(result_length, 10)
     }
   }
+
+mr_stats
+  = 'ntoreturn:' to_return_count:$(DIGIT+) ws 'keyUpdates:' key_updates_count:$(DIGIT+) ws 'locks(micros) r:' read_lock_time:$(DIGIT+) ws 'reslen:' result_length:$(DIGIT+) ws {
+    return {
+      to_return_count: parseInt(to_return_count, 10),
+      key_updates_count: parseInt(key_updates_count, 10),
+      read_lock_time: parseInt(read_lock_time, 10),
+      result_length: parseInt(result_length, 10)
+    }
+  }
+
 ns = database:$([a-zA-Z]+) '.' collection:$([a-zA-Z]+) {
     return {
       'database': database,
@@ -194,7 +205,7 @@ ns = database:$([a-zA-Z]+) '.' collection:$([a-zA-Z]+) {
     };
   }
 
-message = chars
+message = char*
 
 line_before_30
   = ts:timestamp ws context:context ws message:message {
@@ -224,9 +235,28 @@ query_before_30
       };
     }
 
+mr_before_30
+  = ts:timestamp ws context:context ws 'command' ws database:$([a-zA-Z]+) ws '.$cmd command:' spec:JSON_text stats:mr_stats duration:duration {
+    return {
+      'template': 'mr_before_30',
+      'timestamp': ts.timestamp,
+      'timestamp_format': ts.timestamp_format,
+      'thread': context.thread,
+      'connection_id': context.connection_id,
+      'database': database,
+      'collection': spec.mapreduce,
+      'map': spec.map,
+      'reduce': spec.reduce,
+      'query': spec.$query,
+      'stats': stats,
+      'duration': duration.duration
+    };
+  }
+
 
 line
   = query_before_30
+  / mr_before_30
   / line_before_30
   / line_30
 
@@ -272,43 +302,43 @@ line_30
  /* ----- 4. Objects ----- */
 
  object
-   = begin_object
-     members:(
-       first:member
-       rest:(value_separator m:member { return m; })*
-       {
-         var result = {}, i;
+ = begin_object
+   members:(
+     first:member
+     rest:(value_separator m:member { return m; })*
+     {
+       var result = {}, i;
 
-         result[first.name] = first.value;
+       result[first.name] = first.value;
 
-         for (i = 0; i < rest.length; i++) {
-           result[rest[i].name] = rest[i].value;
-         }
-
-         return result;
+       for (i = 0; i < rest.length; i++) {
+         result[rest[i].name] = rest[i].value;
        }
-     )?
-     end_object
-     { return members !== null ? members: {}; }
 
- member
-   = name:json_string name_separator value:value {
-       return { name: name, value: value };
+       return result;
      }
+   )?
+   end_object
+   { return members !== null ? members: {}; }
 
- /* ----- 5. Arrays ----- */
+member
+ = name:json_string name_separator value:value {
+     return { name: name, value: value };
+   }
 
- array
-   = begin_array
-     values:(
-       first:value
-       rest:(value_separator v:value { return v; })*
-       { return [first].concat(rest); }
-     )?
-     end_array
-     { return values !== null ? values : []; }
-     number "number"
-       = minus? int frac? exp? { return parseFloat(text()); }
+/* ----- 5. Arrays ----- */
+
+array
+ = begin_array
+   values:(
+     first:value
+     rest:(value_separator v:value { return v; })*
+     { return [first].concat(rest); }
+   )?
+   end_array
+   { return values !== null ? values : []; }
+   number "number"
+     = minus? int frac? exp? { return parseFloat(text()); }
 
 
 ws "whitespace" = [ \t\n\r]*
@@ -322,7 +352,8 @@ minus         = '-'
 plus          = '+'
 zero          = '0'
 json_string "json string"
-  = quotation_mark chars:char* quotation_mark { return chars.join(""); } / chars:[a-zA-Z\$\.\_]* {return chars.join("");}
+  = quotation_mark chars:char* quotation_mark { return chars.join(""); }
+  / chars:[a-zA-Z\$\.\_]* {return chars.join("");}
 
 string "string"
   = chars:char* { return chars.join(""); }
@@ -345,6 +376,7 @@ char
     )
     { return sequence; }
 
+
 escape         = "\\"
 quotation_mark = '"'
 unescaped      = [\x20-\x21\x23-\x5B\x5D-\u10FFFF]
@@ -352,6 +384,3 @@ unescaped      = [\x20-\x21\x23-\x5B\x5D-\u10FFFF]
 // Core ABNF Rules
 DIGIT = [0-9]
 HEXDIG = [0-9a-f]i
-
-chars
-  = $([A-Za-z0-9.:, /\-\*\n\+\[\]\$\{\"\_\}\=\;\(\#\~\)\|'\>\@]+)
