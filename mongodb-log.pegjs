@@ -169,9 +169,8 @@ severity
  */
 context_connection = '[conn' connection_id:$(DIGIT+) ']' { return { 'connection_id': parseInt(connection_id, 10) } }
 context_thread = '[' thread:$([a-zA-Z]+) ']' { return { 'thread': thread } }
-context = context_connection / context_thread
+context = ws context_connection ws / ws context_thread ws
 
-// 'query ' ns:ns 'query: ' query:query_spec ws stats:query_stats ws duration:duration
 duration = duration:$(DIGIT+) 'ms' { return { 'duration': parseInt(duration, 10) } }
 
 // ntoreturn:1 ntoskip:0 nscanned:0 keyUpdates:0 locks(micros) r:8457 nreturned:0 reslen:20
@@ -188,6 +187,7 @@ query_stats
     }
   }
 
+// ntoreturn:1 keyUpdates:0 locks(micros) r:19091 reslen:208
 mr_stats
   = 'ntoreturn:' to_return_count:$(DIGIT+) ws 'keyUpdates:' key_updates_count:$(DIGIT+) ws 'locks(micros) r:' read_lock_time:$(DIGIT+) ws 'reslen:' result_length:$(DIGIT+) ws {
     return {
@@ -198,6 +198,7 @@ mr_stats
     }
   }
 
+// cursorid:805169450824913355 ntoreturn:0 keyUpdates:0 numYields: 1 locks(micros) r:335 nreturned:1 reslen:217
 getmore_stats
   = 'cursorid:' cursor_id:$(DIGIT+) ws 'ntoreturn:' to_return_count:$(DIGIT+) ws 'keyUpdates:' key_updates_count:$(DIGIT+) ws 'numYields: ' yield_count:$(DIGIT+) ws 'locks(micros) r:' read_lock_time:$(DIGIT+) ws 'nreturned:' returned_count:$(DIGIT+) ws 'reslen:' result_length:$(DIGIT+) ws {
     return {
@@ -211,7 +212,19 @@ getmore_stats
     };
   }
 
-ns = database:$([a-zA-Z]+) '.' collection:$([a-zA-Z]+) {
+// idhack:1 nupdated:1 upsert:1 keyUpdates:0 locks(micros) w:24047
+update_stats
+  = 'idhack:' is_id_hack:$(DIGIT+) ws 'nupdated:' updated_count:$(DIGIT+) ws 'upsert:' is_upsert:$(DIGIT+) ws 'keyUpdates:' key_updates_count:$(DIGIT+) ws 'locks(micros) w:' write_lock_time:$(DIGIT+) ws {
+    return {
+      is_id_hack: Boolean(parseInt(is_id_hack, 10)),
+      updated_count: parseInt(updated_count, 10),
+      is_upsert: Boolean(parseInt(is_upsert, 10)),
+      key_updates_count: parseInt(key_updates_count, 10),
+      write_lock_time: parseInt(write_lock_time, 10)
+    };
+  }
+
+ns = ws database:$([a-zA-Z]+) '.' collection:$([a-zA-Z]+) ws {
     return {
       'database': database,
       'collection': collection
@@ -221,7 +234,7 @@ ns = database:$([a-zA-Z]+) '.' collection:$([a-zA-Z]+) {
 message = char*
 
 line_before_30
-  = ts:timestamp ws context:context ws message:message {
+  = ts:timestamp context:context message:message {
     return {
       'timestamp': ts.timestamp,
       'timestamp_format': ts.timestamp_format,
@@ -233,7 +246,7 @@ line_before_30
 
 
 getmore_before_30
-  = ts:timestamp ws context:context ws 'getmore' ws ns:ns ws 'query:' query:JSON_text stats:getmore_stats duration:duration {
+  = ts:timestamp context:context 'getmore' ns:ns 'query:' query:JSON_text stats:getmore_stats duration:duration {
     return {
       'template': 'getmore_before_30',
       'operation': 'GETMORE',
@@ -252,7 +265,7 @@ getmore_before_30
   }
 
 query_before_30
-  = ts:timestamp ws context:context ws 'query'   ws ns:ns ws 'query:' query:JSON_text stats:query_stats duration:duration {
+  = ts:timestamp context:context 'query' ns:ns 'query:' query:JSON_text stats:query_stats duration:duration {
     return {
       'template': 'query_before_30',
       'operation': 'QUERY',
@@ -271,7 +284,7 @@ query_before_30
   }
 
 mr_before_30
-  = ts:timestamp ws context:context ws 'command' ws database:$([a-zA-Z]+) ws '.$cmd command:' spec:JSON_text stats:mr_stats duration:duration {
+  = ts:timestamp context:context 'command' ws database:$([a-zA-Z]+) ws '.$cmd command:' spec:JSON_text stats:mr_stats duration:duration {
     return {
       'template': 'mr_before_30',
       'operation': 'MAPREDUCE',
@@ -289,17 +302,35 @@ mr_before_30
     };
   }
 
+update_before_30
+  = ts:timestamp context:context 'update' ns:ns 'query:' spec:JSON_text 'update:' update:JSON_text stats:update_stats duration:duration {
+    return {
+      'template': 'update_before_30',
+      'operation': 'UPDATE',
+      'timestamp': ts.timestamp,
+      'timestamp_format': ts.timestamp_format,
+      'thread': context.thread,
+      'connection_id': context.connection_id,
+      'database': ns.database,
+      'collection': ns.collection,
+      'query': spec,
+      'update': update,
+      'stats': stats,
+      'duration': duration.duration
+    };
+  }
 
 line
   = query_before_30
   / mr_before_30
   / getmore_before_30
+  / update_before_30
   / line_before_30
   / line_30
 
 
 line_30
-  = ts:timestamp ws severity:severity ws component:component ws context:context ws message:message {
+  = ts:timestamp ws severity:severity ws component:component context:context message:message {
     return {
       'timestamp': ts.timestamp,
       'timestamp_format': ts.timestamp_format,
@@ -390,7 +421,7 @@ plus          = '+'
 zero          = '0'
 json_string "json string"
   = quotation_mark chars:char* quotation_mark { return chars.join(""); }
-  / chars:[a-zA-Z\$\.\_]* {return chars.join("");}
+  / chars:[a-zA-Z0-9\$\.\_]* {return chars.join("");}
 
 string "string"
   = chars:char* { return chars.join(""); }
