@@ -2,7 +2,7 @@
 
 Normalize MongoDB log entries into objects that make sense.
 
-> :construction: Warning: This was an experiment for the summer of 2014 MongoDB Summer Intern program and is not for production use.
+> :construction: **Warning** This was an experiment for the summer of 2014 MongoDB Summer Intern program and is not for production use.
 
 ## Installation
 
