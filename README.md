@@ -2,6 +2,8 @@
 
 Normalize MongoDB log entries into objects that make sense.
 
+> :construction: This was an experiment for the summer of 2014 MongoDB Summer Intern program and is not recommended for production use.
+
 ## Installation
 
 ```bash
