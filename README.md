@@ -1,8 +1,8 @@
-# mongodb-log [![][npm_img]][npm_url] [![][travis_img]][travis_url] [![][coverage_img]][coverage_url] [![][gitter_img]][gitter_url]
+# mongodb-log [![][npm_img]][npm_url] [![][travis_img]][travis_url]
 
 Normalize MongoDB log entries into objects that make sense.
 
-> :construction: This was an experiment for the summer of 2014 MongoDB Summer Intern program and is not recommended for production use.
+> :construction: Warning: This was an experiment for the summer of 2014 MongoDB Summer Intern program and is not for production use.
 
 ## Installation
 
